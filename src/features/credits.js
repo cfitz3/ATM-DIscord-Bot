@@ -1,81 +1,94 @@
-const Database = require('../api/constants/sql.js'); 
+const Database = require('../api/constants/sql.js');
 
 /**
  * Increments the credit for a given user.
- * @param {string} userId - The ID of the user.
+ * @param {string} minecraftUsername - The Minecraft username of the user.
  * @param {number} incrementBy - The amount to increment the user's credits by.
  */
-function incrementUserCredit(interaction, incrementBy) {
-  return new Promise((resolve, reject) => {
-    const userId = interaction.user.id;
-    const connection = Database.getConnection();
+async function incrementUserCredit(minecraftUsername, incrementBy) {
+  if (!minecraftUsername) {
+    console.error('Minecraft username is not defined.');
+    throw new Error('Minecraft username is not defined.');
+  }
 
-    if (incrementBy === undefined) {
-      console.error('incrementBy value is not defined.');
-      reject('incrementBy value is not defined.');
-      return;
+  if (incrementBy === undefined) {
+    console.error('incrementBy value is not defined.');
+    throw new Error('incrementBy value is not defined.');
+  }
+
+  const updateCreditsQuery = 'UPDATE users SET credits = credits + ?, last_awarded = NOW() WHERE minecraft_username = ?';
+  const insertCreditsQuery = 'INSERT INTO users (minecraft_username, credits, last_awarded) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE credits = credits + ?, last_awarded = NOW()';
+
+  try {
+    const updateResult = await Database.query(updateCreditsQuery, [incrementBy, minecraftUsername]);
+
+    if (updateResult.affectedRows === 0) {
+      await Database.query(insertCreditsQuery, [minecraftUsername, incrementBy, incrementBy]);
     }
 
-    const checkAwardedQuery = 'SELECT last_awarded FROM user_credits WHERE user_id = ? AND last_awarded > NOW() - INTERVAL 12 HOUR';
-
-    connection.query(checkAwardedQuery, [userId], (err, results) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (results.length > 0) {
-        console.log(`User with ID ${userId} has already been awarded credits within the last 12 hours.`);
-        resolve(false); // User has been awarded recently
-        return;
-      }
-
-      const updateQuery = 'UPDATE user_credits SET credits = credits + ?, last_awarded = NOW() WHERE user_id = ?';
-
-      connection.query(updateQuery, [incrementBy, userId], (err, result) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        if (result.affectedRows === 0) {
-          const insertQuery = 'INSERT INTO user_credits (user_id, credits, last_awarded) VALUES (?, ?, NOW())';
-
-          connection.query(insertQuery, [userId, incrementBy], (err) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            console.log(`New user added with ID ${userId} and initial credits of ${incrementBy}.`);
-            resolve(true); // New user added
-          });
-        } else {
-          console.log(`User with ID ${userId} had their credits incremented by ${incrementBy}.`);
-          resolve(true); // Credits incremented
-        }
-      });
-    });
-  });
+    console.log(`User with Minecraft username ${minecraftUsername} has been awarded ${incrementBy} credits.`);
+    return `You have been awarded ${incrementBy} credits.`;
+  } catch (err) {
+    console.error('Error incrementing user credits:', err);
+    throw err;
+  }
 }
 
-// In contracts/credits.js
-function getUserCredits(interaction) {
-  return new Promise((resolve, reject) => {
-    const userId = interaction.user.id;
-    const connection = Database.getConnection(); // Get the database connection
-    const selectQuery = 'SELECT credits FROM user_credits WHERE user_id = ?';
+/**
+ * Gets the credit for a given user.
+ * @param {string} userId - The user ID of the user.
+ * @returns {Promise<string>} - The user's credits as a string.
+ */
 
-    connection.query(selectQuery, [userId], (err, results) => {
-      if (err) {
-        console.error('Error fetching user credits:', err);
-        reject(err);
-      } else if (results.length > 0) {
-        resolve(results[0].credits); // Resolve with the credits value
-      } else {
-        resolve(0); // Resolve with 0 if user not found
-      }
-    });
-  });
+async function getUserCredits(userId) {
+  if (!userId) {
+    console.error('User ID is not defined.');
+    throw new Error('User ID is not defined.');
+  }
+
+  const selectQuery = 'SELECT credits FROM users WHERE discord_id = ?';
+
+  try {
+    const results = await Database.query(selectQuery, [userId]);
+
+    if (results.length > 0) {
+      // Convert BigInt to string
+      const credits = results[0].credits;
+      return credits.toString();
+    } else {
+      return '0'; // Return '0' if user not found
+    }
+  } catch (err) {
+    console.error('Error fetching user credits:', err);
+    throw err;
+  }
 }
 
-module.exports = { incrementUserCredit, getUserCredits };
+/**
+ * Gets the Minecraft username for a given user.
+ * @param {string} userId - The user ID of the user.
+ * @returns {Promise<string>} - The Minecraft username of the user.
+ */
+async function getMinecraftUsername(userId) {
+  if (!userId) {
+    console.error('User ID is not defined.');
+    throw new Error('User ID is not defined.');
+  }
+
+  const selectQuery = 'SELECT minecraft_username FROM users WHERE discord_id = ?';
+
+  try {
+    const results = await Database.query(selectQuery, [userId]);
+
+    if (results.length > 0) {
+      return results[0].minecraft_username;
+    } else {
+      return null; // Return null if user not found
+    }
+  } catch (err) {
+    console.error('Error fetching Minecraft username:', err);
+    throw err;
+  }
+}
+
+module.exports = { incrementUserCredit, getUserCredits, getMinecraftUsername };

@@ -13,7 +13,13 @@ const {
 const config = require("./config.json");
 
 const Database = require('./src/api/constants/sql.js'); // Adjust the path as necessary
-const dbInstance = Database; // This will trigger the connection
+const dbInstance = Database; // This will trigger the connection 
+
+
+
+
+// const pterodactyl = require('./src/api/constants/pterodactyl.js');
+// pterodactyl.initializeWebSocket();
 
 /**
  * From v13, specifying the intents is compulsory.
@@ -57,6 +63,17 @@ for (const file of eventFiles) {
 		);
 	}
 }
+
+const { subscribeToChannel } = require('./src/api/constants/redisManager.js');
+(async () => {
+	try {
+		const discordChannelId = '1336448635738787860'; // Replace with your Discord channel ID
+		await subscribeToChannel(client, discordChannelId, 'nuvotifier:votes');
+		console.log('Subscribed to Redis channel');
+	} catch (err) {
+		console.error('Error subscribing to Redis channel:', err);
+	}
+})();
 
 /**********************************************************************/
 // Define Collection of Commands, Slash Commands and cooldowns
@@ -107,14 +124,18 @@ const slashCommands = fs.readdirSync("./src/interactions/slash");
 // Loop through all files and store slash-commands in slashCommands collection.
 
 for (const module of slashCommands) {
-	const commandFiles = fs
-		.readdirSync(`./src/interactions/slash/${module}`)
-		.filter((file) => file.endsWith(".js"));
+    const commandFiles = fs
+        .readdirSync(`./src/interactions/slash/${module}`)
+        .filter((file) => file.endsWith(".js"));
 
-	for (const commandFile of commandFiles) {
-		const command = require(`./src/interactions/slash/${module}/${commandFile}`);
-		client.slashCommands.set(command.data.name, command);
-	}
+    for (const commandFile of commandFiles) {
+        const command = require(`./src/interactions/slash/${module}/${commandFile}`);
+        if (!command.data || !command.data.name) {
+            console.error(`Invalid command structure in file: ./src/interactions/slash/${module}/${commandFile}`);
+            continue;
+        }
+        client.slashCommands.set(command.data.name, command);
+    }
 }
 
 /**********************************************************************/

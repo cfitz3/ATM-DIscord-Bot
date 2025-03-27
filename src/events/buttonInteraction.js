@@ -1,7 +1,6 @@
 const { Events } = require('discord.js');
 const { syncHelp, linkHelp, forumLinks, forumOops } = require('../responses/embeds/adminEmbeds.js');
 const refreshGuildData = require('../api/functions/refreshGuildMembers.js');
-const { bumpPost } = require('../jobs/bumpPost.js');
 const { incrementUserCredit } = require('../features/credits.js');
 
 module.exports = {
@@ -21,20 +20,7 @@ module.exports = {
         } else if(interaction.customId === 'manualGuildRefreshButton'){
           await refreshGuildData(interaction);
       
-        } else if(interaction.customId === 'startJobsButton'){
-          const client = interaction.client;
-          await bumpPost(client); 
-          await interaction.reply({ content: 'Starting Jobs...', ephemeral: true });
-        
-        } else if (interaction.customId === 'sbr_bump') {
-          const awarded = await incrementUserCredit(interaction, 2);
-          if (awarded) {
-            await interaction.reply({ content: 'Thank you for the support!', embeds: [forumLinks], ephemeral: true });
-          } else {
-            // Reply with a different message if credits were not awarded
-            await interaction.reply({ content: 'Uh Oh!', embeds: [forumOops], ephemeral: true });
-          }
-        
+    
           
 
         }

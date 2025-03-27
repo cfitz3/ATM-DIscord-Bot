@@ -1,6 +1,6 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const { lookupPlayer } = require('../api/functions/scammerLookup.js');
-const { publishMessage } = require('../api/constants/redisManager.js');
+// const { publishMessage } = require('../api/constants/redisManager.js');
 const fs = require('fs');
 const path = require('path');
 const { createGuildJoinEmbed } = require('../responses/embeds/adminEmbeds.js'); 
@@ -64,7 +64,7 @@ module.exports = {
                 // Reply to the interaction to acknowledge it
                 await interaction.reply({ content: 'Your inactivity form has been submitted!', ephemeral: true });
 
-            } else if (interaction.customId === 'join_sbr' || interaction.customId === 'join_sbr_plus') {
+            } /* else if (interaction.customId === 'join_sbr' || interaction.customId === 'join_sbr_plus') {
                 const username = interaction.fields.getTextInputValue('username_input');
                 const playerLookup = await lookupPlayer(username);
 
@@ -79,7 +79,7 @@ module.exports = {
 
                 const embed = createGuildJoinEmbed(username, interaction);
                 await interaction.reply({ content: 'You have been invited! Make sure to do /sync when you join!', embeds: [embed], ephemeral: true });
-            }
+            } */
         } catch (error) {
             console.error('Error handling interaction:', error);
             await interaction.reply({ content: 'There was an issue processing your request. Please try again.', ephemeral: true });

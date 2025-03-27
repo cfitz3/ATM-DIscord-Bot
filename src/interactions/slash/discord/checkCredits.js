@@ -8,7 +8,7 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const credits = await getUserCredits(interaction);
+      const credits = await getUserCredits(interaction.user.id);
       await interaction.reply({ content: `Your current credit balance is: ${credits}`, ephemeral: true });
     } catch (error) {
       console.error('Failed to fetch user credits:', error);

@@ -1,13 +1,24 @@
 const redis = require('redis');
+const { Client, Intents } = require('discord.js');
+const { incrementUserCredit } = require('../../features/credits.js'); // Adjust the path as necessary
 
 // Create Redis clients for publishing and subscribing
 const redisPublisherClient = redis.createClient({
-  url: 'redis://195.201.242.60:6379'
+  url: 'redis://:A1b2C3d4E5@65.109.52.56:60006'
+});
+
+const redisSubscriberClient = redis.createClient({
+  url: 'redis://:A1b2C3d4E5@65.109.52.56:60006'
 });
 
 // Error handling for publisher client
 redisPublisherClient.on('error', (err) => {
   console.error('Redis publisher client error:', err);
+});
+
+// Error handling for subscriber client
+redisSubscriberClient.on('error', (err) => {
+  console.error('Redis subscriber client error:', err);
 });
 
 // Function to connect the Redis clients
@@ -26,8 +37,7 @@ async function connectRedis(client) {
 
 // Connect to Redis for both clients
 connectRedis(redisPublisherClient);
-
-const uuidv4 = require('uuid').v4;
+connectRedis(redisSubscriberClient);
 
 async function publishMessage(channel, triggerKeyword, username) {
   if (!redisPublisherClient.isOpen) {
@@ -36,8 +46,7 @@ async function publishMessage(channel, triggerKeyword, username) {
   }
 
   try {
-    const messageId = uuidv4(); // Generate a unique identifier for the message
-    const payload = JSON.stringify({ messageId, triggerKeyword, username }); // Construct the payload with triggerKeyword and username
+    const payload = JSON.stringify({ triggerKeyword, username }); // Construct the payload with triggerKeyword and username
     const reply = await redisPublisherClient.publish(channel, payload);
     
     console.log(`Message published to Redis channel '${channel}': ${reply}`);
@@ -47,35 +56,60 @@ async function publishMessage(channel, triggerKeyword, username) {
   }
 }
 
+// Function to handle incoming messages and send to Discord channel as an embed
+async function handleRedisMessage(client, discordChannelId, message) {
+  try {
+    const parsedPayload = JSON.parse(message); // Parse the incoming message JSON
+    console.log('Parsed Payload:', parsedPayload);
 
-// Function to process incoming messages
-function handleRedisMessage(messageId, message, colouredMessage) {
-  if (processedMessageIds.has(messageId)) {
-    return; // If the message has already been processed, skip further processing
+    // Increment credits for the user
+    await incrementUserCredit(parsedPayload.username, 10); // Adjust the amount as necessary
+
+    const channel = await client.channels.fetch(discordChannelId);
+    if (channel) {
+      const embed = {
+         // Soft purple color
+          title: '🎉 New Server Vote!',
+          description: `New vote cast on ${parsedPayload.serviceName}. You have been awarded 10 credits! 🎉`, // Adjust the credits as necessary
+        fields: [
+          {
+        name: 'By',
+        value: parsedPayload.username,
+        inline: true
+          },
+          {
+        name: 'Timestamp',
+        value: new Date(parsedPayload.timestamp * 1000).toLocaleString(), // Convert timestamp to readable date
+        inline: true
+          }
+        ],
+        timestamp: new Date(),
+      };
+
+      await channel.send({ embeds: [embed] });
+    } else {
+      console.error('Discord channel not found');
+    }
+  } catch (err) {
+    console.error('Error handling Redis message:', err);
   }
-
-  // Log the parsed message for debugging
-  console.log('Received message from Redis:', { messageId, message, colouredMessage });
-
-  // Mark the message as processed to avoid handling it again
-  processedMessageIds.add(messageId);
 }
 
 // Function to subscribe to a Redis channel and handle incoming messages
-async function subscribeToChannel(channel, messageHandler) {
+async function subscribeToChannel(client, discordChannelId, redisChannel) {
   try {
     if (!redisSubscriberClient.isOpen) {
+      console.log('Subscriber client is not open, connecting...');
       await redisSubscriberClient.connect();
+    } else {
+      console.log('Subscriber client already connected');
     }
-    await redisSubscriberClient.subscribe(channel, (message) => {
+    console.log(`Subscribing to Redis channel '${redisChannel}'...`);
+    await redisSubscriberClient.subscribe(redisChannel, (message) => {
       console.log('Payload Received:', message);
-      try {
-        const parsedPayload = JSON.parse(message); // Parse the incoming message JSON
-        messageHandler(parsedPayload.messageId, parsedPayload.message, parsedPayload.colouredMessage); 
-      } catch (parseError) {
-        console.error('Error parsing message:', parseError); 
-      }
+      handleRedisMessage(client, discordChannelId, message);
     });
+    console.log(`Subscribed to Redis channel '${redisChannel}'`);
   } catch (err) {
     console.error('Redis connection error:', err); 
   }
@@ -85,5 +119,5 @@ module.exports = {
   redisPublisherClient,
   publishMessage,
   subscribeToChannel,
-  handleRedisMessage
+  connectRedis
 };
