@@ -39,18 +39,7 @@ class Database {
       console.error('Error closing the database connection pool:', err);
     }
   }
-
-
-  async connect() {
-    try {
-      const connection = await this.pool.getConnection();
-      console.log('Database connected successfully.');
-      connection.release(); // Release the connection back to the pool
-    } catch (err) {
-      console.error('Error connecting to the database:', err);
-      throw err;
-    }
-  }
+  
 }
 
 

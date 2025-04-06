@@ -12,18 +12,11 @@ const {
 } = require("discord.js");
 const config = require("./config.json");
 
-// Adjust the path as necessary
-const Database = require('./src/api/constants/sql.js');
-try {
-	// Test the database connection
-	Database.connect().then(() => {
-		console.log('Database connection established.');
-	}).catch((error) => {
-		console.error('Error connecting to the database:', error);
-	});
-} catch (error) {
-	console.error('Unexpected error:', error);
-}
+const Database = require('./src/api/constants/sql.js'); // Adjust the path as necessary
+const dbInstance = Database; // This will trigger the connection 
+
+
+
 
 // const pterodactyl = require('./src/api/constants/pterodactyl.js');
 // pterodactyl.initializeWebSocket();
@@ -74,13 +67,15 @@ for (const file of eventFiles) {
 const { subscribeToChannel } = require('./src/api/constants/redisManager.js');
 (async () => {
 	try {
-		const discordChannelId = '1336448635738787860'; // Replace with your Discord channel ID
+		const discordChannelId = '1344284062717710346'; // Replace with your Discord channel ID
 		await subscribeToChannel(client, discordChannelId, 'nuvotifier:votes');
 		console.log('Subscribed to Redis channel');
 	} catch (err) {
 		console.error('Error subscribing to Redis channel:', err);
 	}
 })();
+
+
 
 /**********************************************************************/
 // Define Collection of Commands, Slash Commands and cooldowns
