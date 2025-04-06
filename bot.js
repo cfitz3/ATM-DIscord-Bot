@@ -12,11 +12,18 @@ const {
 } = require("discord.js");
 const config = require("./config.json");
 
-const Database = require('./src/api/constants/sql.js'); // Adjust the path as necessary
-const dbInstance = Database; // This will trigger the connection 
-
-
-
+// Adjust the path as necessary
+const Database = require('./src/api/constants/sql.js');
+try {
+	// Test the database connection
+	Database.connect().then(() => {
+		console.log('Database connection established.');
+	}).catch((error) => {
+		console.error('Error connecting to the database:', error);
+	});
+} catch (error) {
+	console.error('Unexpected error:', error);
+}
 
 // const pterodactyl = require('./src/api/constants/pterodactyl.js');
 // pterodactyl.initializeWebSocket();
