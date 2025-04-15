@@ -15,7 +15,6 @@ async function trackMessage(author) {
     const lastMessageTime = messageCooldowns.get(discordId);
 
     if (lastMessageTime && Date.now() - lastMessageTime < cooldownTime) {
-        console.log(`User ${discordUsername} is on cooldown.`);
         return false; // User is on cooldown, skip tracking
     }
 
@@ -47,10 +46,8 @@ async function trackMessage(author) {
         if (result && result.message_count % 50 === 0) {
             // Award 2 credits to the user
             await incrementUserCredit(discordId, 2, true);
-            console.log(`Added 2 credits to user: ${discordUsername}`);
         }
 
-        console.log(`Message count updated for user: ${discordUsername}`);
         return true; // Successfully tracked the message
     } catch (err) {
         console.error("Error updating message count or credits:", err);
