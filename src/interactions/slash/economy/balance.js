@@ -3,7 +3,7 @@ const { getUserCredits } = require('../../../api/functions/credits.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('checkcredits')
+    .setName('balance')
     .setDescription('Check your current credit balance.'),
 
   async execute(interaction) {
