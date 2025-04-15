@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('devmode')
         .setDescription('Up your current credit balance.'),
+    ownerOnly: true, 
 
     async execute(interaction) {
  

@@ -177,4 +177,21 @@ async function hasPurchasedItem(discordId, itemName) {
   }
 }
 
-module.exports = { incrementUserCredit, getUserCredits, getMinecraftUsername, deductUserCredits, getPurchaseHistory, hasPurchasedItem };
+async function getAllUserCredits() {
+  const query = `
+      SELECT discord_id, credits 
+      FROM users
+      ORDER BY credits DESC
+  `;
+
+  try {
+      const results = await Database.query(query);
+      return results; // Returns an array of users with their credits
+  } catch (err) {
+      console.error('Error fetching user credits:', err);
+      throw err;
+  }
+}
+
+
+module.exports = { incrementUserCredit, getUserCredits, getMinecraftUsername, deductUserCredits, getPurchaseHistory, hasPurchasedItem, getAllUserCredits};

@@ -6,6 +6,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('ping')
         .setDescription('Displays the bot\'s latency, uptime, and other information'),
+    ownerOnly: true, 
 
     async execute(interaction) {
         // Measure API latency using heartbeat interval
