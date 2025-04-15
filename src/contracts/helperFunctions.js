@@ -26,7 +26,13 @@ function replaceVariables(template, variables) {
   return template.replace(/\{(\w+)\}/g, (match, name) => variables[name] ?? match);
 }
 
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 module.exports = {
   formatUsername,
   formatNumber,
+  replaceVariables,
+  escapeRegex,
 };

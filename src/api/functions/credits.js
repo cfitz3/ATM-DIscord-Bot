@@ -122,7 +122,7 @@ async function deductUserCredits(identifier, deductBy, isDiscordId = false, purc
   `;
 
   try {
-    // Deduct credits
+ 
     const deductResult = await Database.query(deductCreditsQuery, [deductBy, identifier, deductBy]);
 
     if (deductResult.affectedRows === 0) {
@@ -130,7 +130,7 @@ async function deductUserCredits(identifier, deductBy, isDiscordId = false, purc
       throw new Error('Insufficient credits or user not found.');
     }
 
-    // Log the purchase
+
     if (purchasedItem) {
       const discordId = isDiscordId ? identifier : await getDiscordIdFromMinecraftUsername(identifier);
       await Database.query(logPurchaseQuery, [discordId, purchasedItem]);
@@ -170,7 +170,7 @@ async function hasPurchasedItem(discordId, itemName) {
 
   try {
     const [result] = await Database.query(query, [discordId, itemName]);
-    return result.count > 0; // Returns true if the item has been purchased
+    return result.count > 0; 
   } catch (err) {
     console.error('Error checking purchase history:', err);
     throw err;
@@ -186,7 +186,7 @@ async function getAllUserCredits() {
 
   try {
       const results = await Database.query(query);
-      return results; // Returns an array of users with their credits
+      return results; 
   } catch (err) {
       console.error('Error fetching user credits:', err);
       throw err;
@@ -194,4 +194,13 @@ async function getAllUserCredits() {
 }
 
 
-module.exports = { incrementUserCredit, getUserCredits, getMinecraftUsername, deductUserCredits, getPurchaseHistory, hasPurchasedItem, getAllUserCredits};
+module.exports = { 
+incrementUserCredit, 
+getUserCredits, 
+getMinecraftUsername, 
+deductUserCredits, 
+getPurchaseHistory, 
+hasPurchasedItem, 
+getAllUserCredits
+
+};
