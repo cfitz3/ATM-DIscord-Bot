@@ -1,7 +1,6 @@
 const { Events } = require('discord.js');
 const { syncHelp, linkHelp, forumLinks, forumOops } = require('../responses/embeds/adminEmbeds.js');
-const refreshGuildData = require('../api/functions/refreshGuildMembers.js');
-const { incrementUserCredit } = require('../features/credits.js');
+const { incrementUserCredit } = require('../api/functions/credits.js');
 
 module.exports = {
 	name: Events.InteractionCreate,

@@ -1,6 +1,6 @@
 const redis = require('redis');
 const { Client, Intents } = require('discord.js');
-const { incrementUserCredit } = require('../../features/credits.js'); // Adjust the path as necessary
+const { incrementUserCredit } = require('../functions/credits.js'); // Adjust the path as necessary
 
 // Create Redis clients for publishing and subscribing
 const redisPublisherClient = redis.createClient({

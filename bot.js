@@ -18,9 +18,6 @@ const dbInstance = Database; // This will trigger the connection
 
 
 
-// const pterodactyl = require('./src/api/constants/pterodactyl.js');
-// pterodactyl.initializeWebSocket();
-
 /**
  * From v13, specifying the intents is compulsory.
  * @type {import('./typings').Client}

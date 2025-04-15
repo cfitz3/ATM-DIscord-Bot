@@ -1,5 +1,4 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { lookupPlayer } = require('../api/functions/scammerLookup.js');
 // const { publishMessage } = require('../api/constants/redisManager.js');
 const fs = require('fs');
 const path = require('path');

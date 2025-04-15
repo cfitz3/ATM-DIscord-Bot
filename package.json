@@ -22,15 +22,13 @@
 	},
 	"license": "Apache-2.0",
 	"bugs": {
-		"url": "https://github.com/cfitz3/sbr-bot"
+		"url": "https://github.com/cfitz3/ATM-Discord-Bot"
 	},
-	"homepage": "https://github.com/cfitz3/sbr-bot",
+	"homepage": "https://github.com/cfitz3/ATM0-Discord-Bot",
 	"dependencies": {
 		"axios": "^1.6.8",
 		"discord-api-types": "^0.37.43",
 		"discord.js": "^14.14.1",
-		"hypixel-api-reborn": "^11.1.0",
-		"lilyweight": "^2.7.2",
 		"mariadb": "^3.4.0",
 		"mysql": "^2.18.1",
 		"node-cron": "^3.0.3",
@@ -38,10 +36,6 @@
 		"redis": "^4.7.0",
 		"redis-cli": "^2.1.2",
 		"redis-server": "^1.2.2",
-		"senitherweight": "^1.0.8",
-		"skyhelper-networth": "^2.0.0",
 		"websocket": "^1.0.35"
 	}
 }
-
-
