@@ -17,6 +17,8 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('vote')
         .setDescription('Vote for our servers!'),
+    
+    linked: true, 
 
     async execute(interaction) {
         try {

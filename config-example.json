@@ -1,38 +1,27 @@
 {
-	"bot": {
-		"prefix": "!",
-		"token": "n",
-		"client_id": "n"
-	  },
-
-	  "server": {
-		"owner": "n",
-		"test_guild_id": "n",
-		"sbr_bridge_channel":"n",
-		"sbr_plus_bridge_channel": "n",
-		"channelId": "n",
-		"sbr_role": "n",
-		"sbr_plus_role":"n",
-		"guest_role": "n",
-		"requirements": "n",
-		"join_requests": "n",
-		"staff_announcements": "n"
-	
-	},
-
-	"api": {
-	  "hypixel_api_token": "n"
-
-	},
-
-	"db": {
-		"host": "n",
-		"user": "n",
-		"password": "n",
-		"database": "n"
-	
-}}
-	  
-	 
-	
-
+    "bot": {
+        "prefix": "!",
+        "token": "YOUR_BOT_TOKEN",
+        "client_id": "YOUR_CLIENT_ID"
+    },
+    "economy": {
+        "vote_credits": 5
+    },
+    "api": {
+        "hypixel_api_token": "YOUR_HYPIXEL_API_TOKEN",
+        "pterodactyl_application_api_key": "YOUR_PTERODACTYL_APP_API_KEY",
+        "pterodactyl_client_api_key": "YOUR_PTERODACTYL_CLIENT_API_KEY",
+        "pterodactyl_dashboard_url": "https://admin.allthemodiumcraft.com"
+    },
+    "db": {
+        "host": "YOUR_DB_HOST",
+        "user": "YOUR_DB_USER",
+        "password": "YOUR_DB_PASSWORD",
+        "database": "YOUR_DB_NAME",
+        "port": "3306"
+    },
+    "redis": {
+        "url": "YOUR_REDIS_URL",
+        "vote_channel": "nuvotifier:votes"
+    }
+}

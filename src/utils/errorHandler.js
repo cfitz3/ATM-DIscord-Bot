@@ -1,10 +1,10 @@
 async function oopsie(interaction, error) {
     console.error('An error occurred:', error);
 
-    let errorMessage = '❌ An unexpected error occurred. Please try again later.';
+    let errorMessage = 'OOPSIE WOOPSIE!! Uwu We made a fucky wucky!! A wittle fucko boingo! The code monkeys at our headquarters are working VEWY HAWD to fix this!';
 
     if (error.message.includes('SQLError') && error.message.includes('discord_username')) {
-        errorMessage = '❌ User not found. Please make sure you have run /vote and linked your account.';
+        errorMessage = '❌ User not found. Your account is not linked. How did you run this command?';
     } else if (error.message.includes('database')) {
         errorMessage = '❌ A database error occurred. Please contact the server administrator.';
     } else if (error.message.includes('permission')) {

@@ -1,12 +1,12 @@
 const { Collection, ChannelType, Events } = require("discord.js");
-const config = require("../../config.json");
 const { escapeRegex } = require("../utils/helperFunctions.js");
-const { trackMessage } = require("../api/functions/messages.js"); 
+const { trackMessage } = require("../api/functions/messages.js");
+const { getGuildSettings } = require("../utils/getGuildSettings.js");
 
 module.exports = {
     name: Events.MessageCreate,
     async execute(message) {
-        const { client, content, author } = message;
+        const { client, content, author, guild } = message;
 
         // Ignore bot messages
         if (author.bot) return;
@@ -24,10 +24,13 @@ module.exports = {
             return;
         }
 
-        const checkPrefix = config.bot.prefix.toLowerCase();
+        // Fetch guild-specific settings
+        const guildId = guild?.id;
+        const guildSettings = guildId ? await getGuildSettings(guildId) : null;
+        const prefix = guildSettings?.prefix || "!"; // Default to "!" if no prefix is found
 
         const prefixRegex = new RegExp(
-            `^(<@!?${client.user.id}>|${escapeRegex(checkPrefix)})\\s*`
+            `^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`
         );
 
         if (!prefixRegex.test(content.toLowerCase())) return;
@@ -49,7 +52,7 @@ module.exports = {
 
         if (!command) return;
 
-        if (command.ownerOnly && message.author.id !== config.server.owner) {
+        if (command.ownerOnly && message.author.id !== guildSettings?.owner_id) {
             return message.reply({ content: "This is an owner-only command!" });
         }
 

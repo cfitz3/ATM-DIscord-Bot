@@ -42,7 +42,8 @@ module.exports = {
                 .setDescription('The message content to send.')
                 .setRequired(true)
         ),
-    ownerOnly: true, // Only allow the owner to use this command
+
+    adminOnly: true,
 
     async execute(interaction) {
         // Check if the user has admin permissions

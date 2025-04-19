@@ -3,26 +3,15 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Database = require('../../../api/constants/sql.js'); 
 const { createLeaderboardEmbed } = require('../../../responses/embeds/leaderboards.js'); 
 const { oopsie } = require('../../../utils/errorHandler.js');
-const { isLinked } = require('../../../api/functions/credits.js');
-const { promptAccountLink } = require('../../../responses/embeds/linkPrompt.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leaderboard')
         .setDescription('Displays the top users by their message count and credits.'),
+    
+    linked: true, 
 
         async execute(interaction) {
-            try {
-              const linked = await isLinked(interaction.user.id);
-              if (!linked) {
-              await promptAccountLink(interaction);
-                return;
-              }
-            } catch (err) {
-                await oopsie(interaction, err);
-                return;
-            }
-        
             
         const leaderboardQuery = `
             SELECT u.discord_id, u.discord_username, u.credits, mc.message_count
@@ -132,5 +121,6 @@ module.exports = {
             console.error('Error fetching leaderboard data:', err);
             await oopsie(interaction, err); 
         }
-    },
-};
+        },
+    };
+    

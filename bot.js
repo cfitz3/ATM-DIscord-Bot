@@ -15,7 +15,6 @@ const {
 
 const { reloadScheduledTasks } = require("./src/utils/scheduler.js");
 
-
 const Database = require('./src/api/constants/sql.js');
 const dbInstance = Database; 
 
@@ -271,9 +270,8 @@ const commandJsonData = [
 
 // List of guild IDs where you want to register commands
 const guildIds = [
-	config.server.atm_guild_id,
-	config.server.cottagequest_guild_id,
-	config.server.test_guild_id
+	config.global.atm_guild_id,
+	config.global.test_guild_id
 ];
 
 (async () => {

@@ -1,12 +1,15 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } = require('discord.js');
 const { scheduledTasks, cancelScheduledTask } = require('../../../utils/scheduler.js');
-const Database = require('../../../api/constants/sql.js'); // Adjust the path to your database module
+const Database = require('../../../api/constants/sql.js');
+
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('manageschedules')
         .setDescription('Manage currently scheduled tasks (list, cancel, create, load).'),
+
+    adminOnly: true,
 
     async execute(interaction) {
         // Create the embed for the menu
@@ -36,7 +39,7 @@ module.exports = {
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId('load_task')
-                .setLabel('Load Task')
+                .setLabel('Import Task')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -86,12 +89,10 @@ module.exports = {
             }
 
             if (i.customId === 'select_task_to_cancel') {
-                const selectedTaskId = i.values[0]; // Get the selected task ID
-            
-                // Acknowledge the interaction
+                const selectedTaskId = i.values[0]; 
+        
                 await i.deferUpdate();
             
-                // Cancel the task
                 cancelScheduledTask(selectedTaskId);
             
                 // Optionally, delete the task from the database

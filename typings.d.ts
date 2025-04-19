@@ -31,6 +31,12 @@ export interface LegacyCommand {
 // Whether this command is for the bot-owner only	
 	ownerOnly?: boolean;
 
+// Whether this command is for staff members only
+	staffOnly?: boolean;
+
+// Whether this command is for admins only
+	adminOnly?: boolean;
+
 	// The command executor when it is called by the template handler.
 	// @param message The message that triggered this command.
 	// @param args The message arguments of the command (seperated by spaces (' ') in an array, this excludes prefix and command/alias itself). 
@@ -42,25 +48,35 @@ export interface LegacyCommand {
 
 // Represents a slash command
 export interface SlashInteractionCommand {
+    // The data of a slash command
+    data: Discord.SlashCommandBuilder;
+    options: Array<
+        | Discord.SlashCommandStringOption
+        | Discord.SlashCommandNumberOption
+        | Discord.SlashCommandRoleOption
+        | Discord.SlashCommandUserOption
+        | Discord.SlashCommandBooleanOption
+        | Discord.SlashCommandChannelOption
+        | Discord.SlashCommandIntegerOption
+    >;
 
-// The data of a slash command
-	data: Discord.SlashCommandBuilder;
-	options: Array<
-		| Discord.SlashCommandStringOption
-		| Discord.SlashCommandNumberOption
-		| Discord.SlashCommandRoleOption
-		| Discord.SlashCommandUserOption
-		| Discord.SlashCommandBooleanOption
-		| Discord.SlashCommandChannelOption
-		| Discord.SlashCommandIntegerOption
-	>;
+    // Whether this command is restricted to admins only
+    adminOnly?: boolean;
 
+    // Whether this command is restricted to staff members only
+    staffOnly?: boolean;
 
-// The interaction executor when it is called by the template handler.
-// @param interaction The interaction that triggered this command.	
-	execute(
-		interaction: Discord.ChatInputCommandInteraction & { client: Client }
-	): void | Promise<void>;
+    // Whether this command is restricted to the bot owner only
+    ownerOnly?: boolean;
+
+	// Whether this command is restricted to linked users only
+	linked?: boolean; 
+	
+    // The interaction executor when it is called by the template handler.
+    // @param interaction The interaction that triggered this command.
+    execute(
+        interaction: Discord.ChatInputCommandInteraction & { client: Client }
+    ): void | Promise<void>;
 }
 
 /**

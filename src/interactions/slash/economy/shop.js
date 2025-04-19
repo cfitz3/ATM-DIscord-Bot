@@ -1,26 +1,16 @@
 const { SlashCommandBuilder, ActionRowBuilder, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 const { getUserCredits, getMinecraftUsername } = require('../../../api/functions/credits.js');
-const { isLinked } = require('../../../api/functions/credits.js');
-const { promptAccountLink } = require('../../../responses/embeds/linkPrompt.js');
-const { oopsie } = require('../../../utils/errorHandler.js');
+
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('shop')
     .setDescription('Spend your credits.'),
 
-    async execute(interaction) {
-        try {
-          const linked = await isLinked(interaction.user.id);
-          if (!linked) {
-          await promptAccountLink(interaction);
-            return;
-          }
-        } catch (err) {
-            await oopsie(interaction, err);
-            return;
-        }
+    linked: true, 
 
+    async execute(interaction) {
+ 
     
     const userCredits = await getUserCredits(interaction.user.id);
     const minecraft_username = await getMinecraftUsername(interaction.user.id);
