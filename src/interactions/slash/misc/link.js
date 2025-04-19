@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getUUID } = require('../../../api/constants/mowojangAPI.js');
-const db = require('../../../api/constants/sql.js');
-const { linkAccount } = require('../../../api/functions/credits.js'); 
+const { linkAccount } = require('../../../api/functions/credits.js'); // Import the linkAccount function
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,6 +17,7 @@ module.exports = {
 
             const minecraft_username = interaction.options.getString('minecraft_username');
 
+            // Fetch the Minecraft UUID
             const minecraft_uuid = await getUUID(minecraft_username);
 
             if (!minecraft_uuid) {
@@ -26,10 +26,8 @@ module.exports = {
                 });
             }
 
+            // Use the linkAccount function to insert or update the user's data
             await linkAccount(interaction.user.id, interaction.user.tag, minecraft_username, minecraft_uuid);
-            const values = [interaction.user.id, interaction.user.tag, minecraft_username, minecraft_uuid];
-
-            await db.query(query, values);
 
             const embed = new EmbedBuilder()
                 .setColor(0x00FF00)
