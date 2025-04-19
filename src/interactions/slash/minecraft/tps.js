@@ -1,3 +1,4 @@
+/*
 const { SlashCommandBuilder } = require('discord.js');
 const { sendConsoleCommand, getLastConsoleOutput } = require('../../../api/constants/pterodactyl.js');
 const { EmbedBuilder } = require('discord.js');
@@ -52,3 +53,4 @@ module.exports = {
         }, 2000); // Adjust the delay as needed
     }
 };
+*/

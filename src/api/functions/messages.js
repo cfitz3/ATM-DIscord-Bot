@@ -1,11 +1,10 @@
-const Database = require("../constants/sql.js"); // Adjust the path to your database module
-const { incrementUserCredit } = require("./credits.js"); // Import the incrementUserCredit function
+const Database = require("../constants/sql.js"); 
+const { incrementUserCredit } = require("./credits.js"); 
 const { Collection } = require("discord.js");
 
-// Cooldown collection to track user message cooldowns
 const messageCooldowns = new Collection();
 
-const cooldownTime = 5000; // Cooldown time in milliseconds (5 seconds)
+const cooldownTime = 5000; 
 
 async function trackMessage(author) {
     const discordId = author.id;
@@ -44,14 +43,13 @@ async function trackMessage(author) {
         const [result] = await Database.query(checkMessageCountQuery, [discordId]);
 
         if (result && result.message_count % 50 === 0) {
-            // Award 2 credits to the user
             await incrementUserCredit(discordId, 2, true);
         }
 
-        return true; // Successfully tracked the message
+        return true; 
     } catch (err) {
         console.error("Error updating message count or credits:", err);
-        return false; // Failed to track the message
+        return false; 
     }
 }
 

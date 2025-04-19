@@ -1,6 +1,7 @@
 
 // Declare constants which will be used throughout the bot.
 
+const config = require("./config.json");
 const fs = require("fs");
 const {
 	Client,
@@ -10,10 +11,13 @@ const {
 	REST,
 	Routes
 } = require("discord.js");
-const config = require("./config.json");
 
-const Database = require('./src/api/constants/sql.js'); // Adjust the path as necessary
-const dbInstance = Database; // This will trigger the connection 
+
+const { reloadScheduledTasks } = require("./src/utils/scheduler.js");
+
+
+const Database = require('./src/api/constants/sql.js');
+const dbInstance = Database; 
 
 
 
@@ -43,6 +47,9 @@ const client = new Client({
  * @description All event files of the event handler.
  * @type {String[]}
  */
+(async () => {
+	await reloadScheduledTasks(client);
+})();
 
 const eventFiles = fs
 	.readdirSync("./src/events")
@@ -66,7 +73,6 @@ const { subscribeToChannel } = require('./src/api/constants/redisManager.js');
 	try {
 		const discordChannelId = '1344284062717710346'; // Replace with your Discord channel ID
 		await subscribeToChannel(client, discordChannelId, 'nuvotifier:votes');
-		console.log('Subscribed to Redis channel');
 	} catch (err) {
 		console.error('Error subscribing to Redis channel:', err);
 	}

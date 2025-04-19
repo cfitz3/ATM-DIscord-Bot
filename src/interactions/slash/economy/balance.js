@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUserCredits } = require('../../../api/functions/credits.js');
+const { getUserCredits, isLinked } = require('../../../api/functions/credits.js');
+const { promptAccountLink } = require('../../../responses/embeds/linkPrompt.js');
+
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -8,6 +10,12 @@ module.exports = {
 
   async execute(interaction) {
     try {
+      const linked = await isLinked(interaction.user.id);
+      if (!linked) {
+      await promptAccountLink(interaction);
+        return;
+      }
+
       const credits = await getUserCredits(interaction.user.id);
 
       // Add flair: color, thumbnail, emoji, and a fun footer

@@ -193,6 +193,36 @@ async function getAllUserCredits() {
   }
 }
 
+/**
+ * Checks if a user's Minecraft account is linked to their Discord account.
+ * @param {string} discordId - The Discord ID of the user.
+ * @returns {Promise<boolean>} - Returns true if the account is linked, otherwise false.
+ */
+async function isLinked(discordId) {
+  try {
+      const query = `SELECT COUNT(*) AS count FROM users WHERE discord_id = ?`;
+      const [result] = await Database.query(query, [discordId]);
+      return result.count > 0; 
+  } catch (error) {
+      console.error('Error checking account linking:', error);
+      throw new Error('Failed to check account linking.');
+  }
+}
+
+  // Function to insert or update user data in the database
+  async function linkAccount(discordId, discordUsername, minecraftUsername, minecraftUuid) {
+    const query = `
+        INSERT INTO users (discord_id, discord_username, minecraft_username, minecraft_uuid)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        discord_username = VALUES(discord_username),
+        minecraft_username = VALUES(minecraft_username),
+        minecraft_uuid = VALUES(minecraft_uuid)
+    `;
+    const values = [discordId, discordUsername, minecraftUsername, minecraftUuid];
+    await Database.query(query, values);
+}
+
 
 module.exports = { 
 incrementUserCredit, 
@@ -201,6 +231,8 @@ getMinecraftUsername,
 deductUserCredits, 
 getPurchaseHistory, 
 hasPurchasedItem, 
-getAllUserCredits
+getAllUserCredits,
+isLinked,
+linkAccount
 
 };

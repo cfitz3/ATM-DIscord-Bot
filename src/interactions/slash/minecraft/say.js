@@ -1,3 +1,4 @@
+/*
 const { SlashCommandBuilder } = require('discord.js');
 const { sendConsoleCommand } = require('../../../api/constants/pterodactyl.js');
 
@@ -25,3 +26,4 @@ module.exports = {
         await interaction.editReply(`Command sent: ${command}`);
     }
 };
+*/

@@ -1,7 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getUUID } = require('../../../api/constants/mowojangAPI.js');
 const mariaDB = require('../../../api/constants/sql.js');
-
+const { isLinked } = require('../../../api/functions/credits.js');
+const { oopsie } = require('../../../utils/errorHandler.js');
+const { promptAccountLink } = require('../../../responses/embeds/linkPrompt.js');
 
 const embed = new EmbedBuilder()
     .setColor(0xFF69B4)
@@ -25,7 +27,17 @@ module.exports = {
                 .setDescription('Your Minecraft username.')
                 .setRequired(true)),
 
-        async execute(interaction) {
+                async execute(interaction) {
+                    try {
+                      const linked = await isLinked(interaction.user.id);
+                      if (!linked) {
+                      await promptAccountLink(interaction);
+                        return;
+                      }
+                    } catch (err) {
+                        await oopsie(interaction, err);
+                        return;
+                    }
             try {
                 // Defer the reply
                 await interaction.deferReply({ ephemeral: true });

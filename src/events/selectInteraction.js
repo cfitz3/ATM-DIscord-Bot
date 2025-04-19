@@ -9,6 +9,8 @@ module.exports = {
             const selectedOption = interaction.values[0];
             let deductBy, purchasedItem, command;
 
+            const serverName = 'atm10';
+
             if (selectedOption === 'item_1') {
                 deductBy = 50;
                 purchasedItem = '75claims';
@@ -48,7 +50,9 @@ module.exports = {
                     // Deduct credits and log the purchase
                     await deductUserCredits(interaction.user.id, deductBy, true, purchasedItem);
                     const minecraftUsername = await getMinecraftUsername(interaction.user.id);
-                    await sendConsoleCommand(command.replace('{minecraftUsername}', minecraftUsername)); // Execute the command
+
+                    // Use the updated sendConsoleCommand function
+                    await sendConsoleCommand(serverName, command.replace('{minecraftUsername}', minecraftUsername));
 
                     // Reply with success message
                     await interaction.reply({

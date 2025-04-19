@@ -9,7 +9,7 @@ class Database {
         user: config.db.user,
         password: config.db.password,
         database: config.db.database,
-        port: config.db.port, // Specify the custom port here
+        port: config.db.port, 
         connectionLimit: 5
       });
       Database.instance = this;

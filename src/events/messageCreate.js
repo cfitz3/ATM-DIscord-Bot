@@ -1,6 +1,6 @@
 const { Collection, ChannelType, Events } = require("discord.js");
 const config = require("../../config.json");
-const { escapeRegex } = require("../contracts/helperFunctions.js");
+const { escapeRegex } = require("../utils/helperFunctions.js");
 const { trackMessage } = require("../api/functions/messages.js"); 
 
 module.exports = {

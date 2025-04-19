@@ -79,4 +79,8 @@ async function resolveUsernameOrUUID(username) {
   }
 }
 
-module.exports = { getUUID, getUsername, resolveUsernameOrUUID };
+module.exports = { 
+  getUUID,
+  getUsername, 
+  resolveUsernameOrUUID 
+};

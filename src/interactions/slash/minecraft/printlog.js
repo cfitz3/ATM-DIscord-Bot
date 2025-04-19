@@ -1,3 +1,4 @@
+/*
 const { SlashCommandBuilder } = require('discord.js');
 const { getLastConsoleOutput } = require('../../../api/constants/pterodactyl.js');
 
@@ -17,3 +18,4 @@ module.exports = {
         await interaction.editReply(`Console output:\n${output}`);
     }
 };
+*/

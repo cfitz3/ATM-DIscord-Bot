@@ -1,16 +1,29 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const Database = require('../../../api/constants/sql.js'); // Adjust the path to your database module
-const { createLeaderboardEmbed } = require('../../../responses/embeds/leaderboards.js'); // Import the embed logic
+const Database = require('../../../api/constants/sql.js'); 
+const { createLeaderboardEmbed } = require('../../../responses/embeds/leaderboards.js'); 
+const { oopsie } = require('../../../utils/errorHandler.js');
+const { isLinked } = require('../../../api/functions/credits.js');
+const { promptAccountLink } = require('../../../responses/embeds/linkPrompt.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leaderboard')
         .setDescription('Displays the top users by their message count and credits.'),
 
-    async execute(interaction) {
-        const userId = interaction.user.id; // Get the ID of the user who ran the command
-
+        async execute(interaction) {
+            try {
+              const linked = await isLinked(interaction.user.id);
+              if (!linked) {
+              await promptAccountLink(interaction);
+                return;
+              }
+            } catch (err) {
+                await oopsie(interaction, err);
+                return;
+            }
+        
+            
         const leaderboardQuery = `
             SELECT u.discord_id, u.discord_username, u.credits, mc.message_count
             FROM users u
@@ -19,23 +32,26 @@ module.exports = {
         `;
 
         const userRankQuery = `
-            SELECT RANK() OVER (ORDER BY mc.message_count DESC, u.credits DESC) AS rank,
-                   u.discord_id, u.discord_username, u.credits, mc.message_count
-            FROM users u
-            LEFT JOIN message_counts mc ON u.discord_id = mc.discord_id
-            WHERE u.discord_id = ?
+            SELECT rank, discord_id, discord_username, credits, message_count
+            FROM (
+                SELECT RANK() OVER (ORDER BY COALESCE(mc.message_count, 0) DESC) AS rank,
+                       u.discord_id, u.discord_username, u.credits, COALESCE(mc.message_count, 0) AS message_count
+                FROM users u
+                LEFT JOIN message_counts mc ON u.discord_id = mc.discord_id
+            ) ranked
+            WHERE discord_id = ?
         `;
 
         try {
-            // Fetch all leaderboard data
             const leaderboardResults = await Database.query(leaderboardQuery);
 
             if (leaderboardResults.length === 0) {
                 return await interaction.reply({ content: 'No data found for the leaderboard.', ephemeral: true });
             }
 
-            // Fetch the user's rank
-            const [userRankResult] = await Database.query(userRankQuery, [userId]);
+            const [userRankResult] = await Database.query(userRankQuery, [interaction.user.id]);
+           
+
             const userRank = userRankResult
                 ? {
                       rank: userRankResult.rank,
@@ -44,38 +60,32 @@ module.exports = {
                   }
                 : null;
 
-            // Pagination variables
             const itemsPerPage = 5;
             let currentPage = 1;
-
-            // Create the initial embed
             const embed = createLeaderboardEmbed(leaderboardResults, userRank, currentPage, itemsPerPage);
 
-            // Create buttons for pagination
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId('previous')
                     .setLabel('Previous')
                     .setStyle(ButtonStyle.Primary)
-                    .setDisabled(true), // Disabled on the first page
+                    .setDisabled(true), 
                 new ButtonBuilder()
                     .setCustomId('next')
                     .setLabel('Next')
                     .setStyle(ButtonStyle.Primary)
-                    .setDisabled(leaderboardResults.length <= itemsPerPage) // Disabled if there's only one page
+                    .setDisabled(leaderboardResults.length <= itemsPerPage)
             );
 
-            // Send the initial embed with buttons
             const message = await interaction.reply({
                 embeds: [embed],
                 components: [row],
                 fetchReply: true,
             });
 
-            // Create a collector for button interactions
             const collector = message.createMessageComponentCollector({
                 filter: (i) => i.user.id === interaction.user.id,
-                time: 60000, // 1 minute
+                time: 60000, 
             });
 
             collector.on('collect', async (i) => {
@@ -85,7 +95,6 @@ module.exports = {
                     currentPage++;
                 }
 
-                // Update the embed and buttons
                 const updatedEmbed = createLeaderboardEmbed(leaderboardResults, userRank, currentPage, itemsPerPage);
                 const updatedRow = new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
@@ -104,7 +113,6 @@ module.exports = {
             });
 
             collector.on('end', async () => {
-                // Disable buttons after the collector ends
                 const disabledRow = new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId('previous')
@@ -121,11 +129,8 @@ module.exports = {
                 await message.edit({ components: [disabledRow] });
             });
         } catch (err) {
-            console.error('Error fetching leaderboard:', err);
-            await interaction.reply({
-                content: 'An error occurred while fetching the leaderboard. Please try again later.',
-                ephemeral: true,
-            });
+            console.error('Error fetching leaderboard data:', err);
+            await oopsie(interaction, err); 
         }
     },
 };
