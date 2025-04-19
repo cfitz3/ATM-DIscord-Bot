@@ -265,39 +265,34 @@ for (const module of selectMenus) {
 const rest = new REST({ version: "9" }).setToken(config.bot.token);
 
 const commandJsonData = [
-	...Array.from(client.slashCommands.values()).map((c) => c.data.toJSON()),
-	...Array.from(client.contextCommands.values()).map((c) => c.data),
+    ...Array.from(client.slashCommands.values()).map((c) => c.data.toJSON()),
+    ...Array.from(client.contextCommands.values()).map((c) => c.data),
+];
+
+// List of guild IDs where you want to register commands
+const guildIds = [
+	config.server.atm_guild_id,
+	config.server.cottagequest_guild_id,
+	config.server.test_guild_id
 ];
 
 (async () => {
-	try {
-		console.log("Started refreshing application (/) commands.");
+    try {
+        console.log("Started refreshing guild-specific application (/) commands.");
 
-		await rest.put(
-			/**
-			 * By default, you will be using guild commands during development.
-			 * Once you are done and ready to use global commands (which have 1 hour cache time),
-			 * 1. Please uncomment the below (commented) line to deploy global commands.
-			 * 2. Please comment the below (uncommented) line (for guild commands).
-			 */
+        // Loop through each guild and register commands
+        for (const guildId of guildIds) {
+            await rest.put(
+                Routes.applicationGuildCommands(config.bot.client_id, guildId),
+                { body: commandJsonData }
+            );
+            console.log(`Successfully registered commands for guild: ${guildId}`);
+        }
 
-			Routes.applicationGuildCommands(config.bot.client_id, config.server.test_guild_id),
-
-			/**
-			 * Good advice for global commands, you need to execute them only once to update
-			 * your commands to the Discord API. Please comment it again after running the bot once
-			 * to ensure they don't get re-deployed on the next restart.
-			 */
-
-			// Routes.applicationCommands(client_id)
-
-			{ body: commandJsonData }
-		);
-
-		console.log("Successfully reloaded application (/) commands.");
-	} catch (error) {
-		console.error(error);
-	}
+        console.log("Successfully reloaded guild-specific application (/) commands.");
+    } catch (error) {
+        console.error("Error registering guild-specific commands:", error);
+    }
 })();
 
 /**********************************************************************/
