@@ -1,5 +1,4 @@
 const { Events } = require('discord.js');
-const { syncHelp, linkHelp, forumLinks, forumOops } = require('../responses/embeds/adminEmbeds.js');
 const { incrementUserCredit } = require('../api/functions/credits.js');
 const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 
