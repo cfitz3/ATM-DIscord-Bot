@@ -43,7 +43,7 @@ module.exports = {
 
             // Use the equipped background or fallback to the local default image
             const backgroundUrl = equippedCosmetic?.background_url;
-            const defaultBackgroundPath = path.join(__dirname, '../../../assets/default-background.png');
+            const defaultBackgroundPath = path.join(__dirname, '../../../../assets/default-background.png');
             let backgroundImage;
 
             try {
