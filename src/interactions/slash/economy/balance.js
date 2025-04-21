@@ -7,6 +7,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('balance')
     .setDescription('Check your current credit balance.'),
+    
   linked: true,
 
   async execute(interaction) {

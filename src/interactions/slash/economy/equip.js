@@ -1,10 +1,13 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const Database = require('../../../api/constants/sql.js');
+const { linked } = require('./shop.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('equip')
         .setDescription('Equip a cosmetic item from your inventory.'),
+
+    linked: true,
 
     async execute(interaction) {
         try {

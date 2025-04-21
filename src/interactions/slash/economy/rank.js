@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const Database = require('../../../api/constants/sql.js');
 const { calculateXPForLevel } = require('../../../utils/helperFunctions.js');
+const { linked } = require('./shop.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,6 +11,9 @@ module.exports = {
             option.setName('user')
                 .setDescription('The user to view the rank for.')
         ),
+
+    linked: true,
+
     async execute(interaction) {
         const target = interaction.options.getUser('user') || interaction.user;
 

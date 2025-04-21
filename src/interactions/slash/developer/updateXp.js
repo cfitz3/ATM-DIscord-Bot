@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('updatexp')
         .setDescription('Developer-only command to update user XP based on historical messages sent.'),
+   
     ownerOnly: true,
 
     async execute(interaction) {

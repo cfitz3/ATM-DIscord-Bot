@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('history')
         .setDescription('View your purchase history.'),
+        
     ownerOnly: true, 
 
     async execute(interaction) {

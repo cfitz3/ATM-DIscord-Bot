@@ -7,6 +7,8 @@ module.exports = {
         .setName('profile')
         .setDescription('View your profile.'),
 
+    linked: true,
+
     async execute(interaction) {
         const userId = interaction.user.id;
 

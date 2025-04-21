@@ -11,6 +11,9 @@ module.exports = {
                 .setDescription('The user to view the modlog for.')
                 .setRequired(true)
         ),
+
+    staffOnly: true, 
+
     async execute(interaction) {
         const target = interaction.options.getUser('user');
 

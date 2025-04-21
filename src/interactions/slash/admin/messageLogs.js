@@ -14,6 +14,9 @@ module.exports = {
             option.setName('limit')
                 .setDescription('The number of messages to display (default: 10).')
         ),
+
+    adminOnly: true,
+    
     async execute(interaction) {
         const target = interaction.options.getUser('user');
         const limit = interaction.options.getInteger('limit') || 10;

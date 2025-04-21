@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const Database = require('../../../api/constants/sql.js');
+const { adminOnly } = require('./manageSchedules.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,6 +11,8 @@ module.exports = {
                 .setDescription('The name of the item to remove.')
                 .setRequired(true)
         ),
+
+    adminOnly: true,
 
     async execute(interaction) {
         const itemName = interaction.options.getString('item_name');

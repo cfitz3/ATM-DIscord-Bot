@@ -19,6 +19,9 @@ module.exports = {
             option.setName('reason')
                 .setDescription('The reason for the timeout.')
         ),
+
+    staffOnly: true, 
+    
     async execute(interaction) {
         const target = interaction.options.getUser('user');
         const duration = interaction.options.getInteger('duration');

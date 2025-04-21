@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('unlink')
         .setDescription('Unlink your Minecraft account from your Discord account.'),
+        
     ownerOnly: true, 
 
     async execute(interaction) {

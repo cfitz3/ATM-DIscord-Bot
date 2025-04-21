@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const Database = require('../../../api/constants/sql.js');
+const { adminOnly } = require('./manageSchedules.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -39,6 +40,8 @@ module.exports = {
                 .setDescription('The effect value of the item (optional).')
                 .setRequired(false)
         ),
+
+    adminOnly: true,
 
     async execute(interaction) {
         const name = interaction.options.getString('name');
