@@ -1,7 +1,8 @@
 const { Collection, ChannelType, Events } = require("discord.js");
 const { escapeRegex } = require("../utils/helperFunctions.js");
-const { trackMessage } = require("../api/functions/messages.js");
+const { trackMessage } = require("../api/functions/trackMessage.js");
 const { getGuildSettings } = require("../utils/getGuildSettings.js");
+const { logMessage } = require("../api/functions/logMessages.js");
 
 module.exports = {
     name: Events.MessageCreate,
@@ -11,9 +12,19 @@ module.exports = {
         // Ignore bot messages
         if (author.bot) return;
 
+        // Fetch guild-specific settings
+        const guildId = guild?.id;
+        const guildSettings = guildId ? await getGuildSettings(guildId) : null;
+        const xpMultiplier = guildSettings?.xpMultiplier || 1; // Default to 1 if no multiplier is found
+        const baseXP = guildSettings?.base_xp || 15; // Default to 15 if no base_xp is found
+        const prefix = guildSettings?.prefix || "!"; // Default to "!" if no prefix is found
+
         // Track messages for the leaderboard and points
-        const tracked = await trackMessage(author);
-        if (!tracked) return; // Skip further processing if the user is on cooldown
+        const tracked = await trackMessage(author, baseXP, xpMultiplier); // Pass baseXP and xpMultiplier to trackMessage
+        if (!tracked) return;
+
+        const logged = await logMessage(message);
+        if (!logged) return;
 
         // Checks if the bot is mentioned in the message all alone and triggers onMention trigger.
         if (
@@ -23,11 +34,6 @@ module.exports = {
             require("../messages/onMention").execute(message);
             return;
         }
-
-        // Fetch guild-specific settings
-        const guildId = guild?.id;
-        const guildSettings = guildId ? await getGuildSettings(guildId) : null;
-        const prefix = guildSettings?.prefix || "!"; // Default to "!" if no prefix is found
 
         const prefixRegex = new RegExp(
             `^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`

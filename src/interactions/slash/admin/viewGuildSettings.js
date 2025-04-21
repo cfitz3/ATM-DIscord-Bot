@@ -23,13 +23,13 @@ module.exports = {
             .setTitle('Current Guild Settings')
             .setDescription('Here are the current settings for this server:')
             .addFields(
-                { name: 'Prefix', value: `\`${guildSettings.prefix || '!'}\``, inline: true },
-                { name: 'Admin Role', value: guildSettings.admin_role_id ? `<@&${guildSettings.admin_role_id}>` : '`Not Set`', inline: true },
-                { name: 'Staff Role', value: guildSettings.staff_role_id ? `<@&${guildSettings.staff_role_id}>` : '`Not Set`', inline: true },
-                { name: 'Log Channel', value: guildSettings.log_channel_id ? `<#${guildSettings.log_channel_id}>` : '`Not Set`', inline: true },
-                { name: 'Welcome Channel', value: guildSettings.welcome_channel_id ? `<#${guildSettings.welcome_channel_id}>` : '`Not Set`', inline: true },
-                { name: 'Staff Announcements Channel', value: guildSettings.staff_announcements_channel ? `<#${guildSettings.staff_announcements_channel}>` : '`Not Set`', inline: true },
-                { name: 'Requirements', value: `\`${guildSettings.requirements || 0}\``, inline: true }
+            { name: 'Prefix', value: `\`${guildSettings.prefix || '!'}\``, inline: true },
+            { name: 'Admin Role', value: guildSettings.admin_role_id ? `<@&${guildSettings.admin_role_id}>` : '`Not Set`', inline: true },
+            { name: 'Staff Role', value: guildSettings.staff_role_id ? `<@&${guildSettings.staff_role_id}>` : '`Not Set`', inline: true },
+            { name: 'Log Channel', value: guildSettings.log_channel_id ? `<#${guildSettings.log_channel_id}>` : '`Not Set`', inline: true },
+            { name: 'Welcome Channel', value: guildSettings.welcome_channel_id ? `<#${guildSettings.welcome_channel_id}>` : '`Not Set`', inline: true },
+            { name: 'Staff Announcements Channel', value: guildSettings.staff_announcements_channel ? `<#${guildSettings.staff_announcements_channel}>` : '`Not Set`', inline: true },
+            { name: 'Base Server XP', value: `\`${guildSettings.base_xp || 0}\``, inline: true }
             )
             .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
             .setTimestamp();

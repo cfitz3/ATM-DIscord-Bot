@@ -30,9 +30,14 @@ function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function calculateXPForLevel(level) {
+  return 5 * (level ** 2) + 50 * level + 100; // Quadratic scaling
+}
+
 module.exports = {
   formatUsername,
   formatNumber,
   replaceVariables,
   escapeRegex,
+  calculateXPForLevel
 };

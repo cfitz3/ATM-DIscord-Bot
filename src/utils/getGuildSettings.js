@@ -1,14 +1,13 @@
 const Database = require('../api/constants/sql.js');
 
 async function getGuildSettings(guildId) {
-   
     const query = `SELECT * FROM server_settings WHERE guild_id = ?`;
     let rows;
     try {
-        rows = await Database.query(query, [guildId]); 
+        rows = await Database.query(query, [guildId]);
     } catch (error) {
         console.error(`Error fetching settings for guild ${guildId}:`, error);
-        throw error; 
+        throw error;
     }
 
     if (!Array.isArray(rows) || rows.length === 0) {
@@ -20,6 +19,7 @@ async function getGuildSettings(guildId) {
             welcome_channel_id: null,
             staff_announcements_channel: null,
             requirements: 0,
+            base_xp: 15, // Default base XP value
         };
     }
 

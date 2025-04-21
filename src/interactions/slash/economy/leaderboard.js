@@ -1,30 +1,31 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const Database = require('../../../api/constants/sql.js'); 
-const { createLeaderboardEmbed } = require('../../../responses/embeds/leaderboards.js'); 
+const Database = require('../../../api/constants/sql.js');
+const { createLeaderboardEmbed } = require('../../../responses/embeds/leaderboards.js');
 const { oopsie } = require('../../../utils/errorHandler.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leaderboard')
-        .setDescription('Displays the top users by their message count and credits.'),
-    
-    linked: true, 
+        .setDescription('Displays the top users by their XP and rank.'),
 
-        async execute(interaction) {
-            
+    linked: true,
+
+    async execute(interaction) {
+        // Updated SQL query to rank users by XP
         const leaderboardQuery = `
-            SELECT u.discord_id, u.discord_username, u.credits, mc.message_count
+            SELECT u.discord_id, u.discord_username, mc.xp, mc.level
             FROM users u
             LEFT JOIN message_counts mc ON u.discord_id = mc.discord_id
-            ORDER BY mc.message_count DESC, u.credits DESC
+            ORDER BY mc.xp DESC, mc.level DESC
         `;
 
         const userRankQuery = `
-            SELECT rank, discord_id, discord_username, credits, message_count
+            SELECT rank, discord_id, discord_username, xp, level
             FROM (
-                SELECT RANK() OVER (ORDER BY COALESCE(mc.message_count, 0) DESC) AS rank,
-                       u.discord_id, u.discord_username, u.credits, COALESCE(mc.message_count, 0) AS message_count
+                SELECT RANK() OVER (ORDER BY COALESCE(mc.xp, 0) DESC, COALESCE(mc.level, 0) DESC) AS rank,
+                       u.discord_id, u.discord_username, COALESCE(mc.xp, 0) AS xp,
+                       COALESCE(mc.level, 0) AS level
                 FROM users u
                 LEFT JOIN message_counts mc ON u.discord_id = mc.discord_id
             ) ranked
@@ -39,13 +40,12 @@ module.exports = {
             }
 
             const [userRankResult] = await Database.query(userRankQuery, [interaction.user.id]);
-           
 
             const userRank = userRankResult
                 ? {
                       rank: userRankResult.rank,
-                      message_count: userRankResult.message_count || 0,
-                      credits: userRankResult.credits || 0,
+                      xp: userRankResult.xp || 0,
+                      level: userRankResult.level || 1,
                   }
                 : null;
 
@@ -58,7 +58,7 @@ module.exports = {
                     .setCustomId('previous')
                     .setLabel('Previous')
                     .setStyle(ButtonStyle.Primary)
-                    .setDisabled(true), 
+                    .setDisabled(true),
                 new ButtonBuilder()
                     .setCustomId('next')
                     .setLabel('Next')
@@ -74,7 +74,7 @@ module.exports = {
 
             const collector = message.createMessageComponentCollector({
                 filter: (i) => i.user.id === interaction.user.id,
-                time: 60000, 
+                time: 60000,
             });
 
             collector.on('collect', async (i) => {
@@ -119,8 +119,7 @@ module.exports = {
             });
         } catch (err) {
             console.error('Error fetching leaderboard data:', err);
-            await oopsie(interaction, err); 
+            await oopsie(interaction, err);
         }
-        },
-    };
-    
+    },
+};
