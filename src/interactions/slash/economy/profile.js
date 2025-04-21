@@ -1,3 +1,4 @@
+const path = require('path');
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { createCanvas, loadImage } = require('canvas');
 const Database = require('../../../api/constants/sql.js');
@@ -6,8 +7,6 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('profile')
         .setDescription('View your profile.'),
-
-    linked: true,
 
     async execute(interaction) {
         const userId = interaction.user.id;
@@ -35,22 +34,27 @@ module.exports = {
 
             // Fetch the equipped cosmetic and its background
             const equippedCosmeticQuery = `
-                SELECT COALESCE(c.background_url, 'https://i.imgur.com/TERRBR9.png') AS background_url
+                SELECT c.background_url
                 FROM user_cosmetics uc
                 JOIN cosmetics c ON uc.cosmetic_id = c.id
                 WHERE uc.discord_id = ? AND uc.equipped = TRUE
             `;
             const [equippedCosmetic] = await Database.query(equippedCosmeticQuery, [userId]);
 
-            // Load the background image
-            const backgroundUrl = equippedCosmetic ? equippedCosmetic.background_url : 'https://i.imgur.com/TERRBR9.png';
+            // Use the equipped background or fallback to the local default image
+            const backgroundUrl = equippedCosmetic?.background_url;
+            const defaultBackgroundPath = path.join(__dirname, '../../../assets/default-background.png');
             let backgroundImage;
 
             try {
-                backgroundImage = await loadImage(backgroundUrl);
+                if (backgroundUrl) {
+                    backgroundImage = await loadImage(backgroundUrl); // Attempt to load the equipped background
+                } else {
+                    throw new Error('No equipped background found, using default.');
+                }
             } catch (error) {
-                console.error(`Error loading background image: ${backgroundUrl}`, error);
-                backgroundImage = await loadImage('https://i.imgur.com/TERRBR9.png'); // Fallback
+                console.error(`Error loading background image: ${backgroundUrl || 'None'}`, error);
+                backgroundImage = await loadImage(defaultBackgroundPath); // Fallback to local image
             }
 
             // Create a canvas
