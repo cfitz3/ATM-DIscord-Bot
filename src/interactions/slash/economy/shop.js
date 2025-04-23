@@ -70,7 +70,7 @@ module.exports = {
 
             // Handle the dropdown interaction
             const filter = (i) => i.customId === 'shop_menu' && i.user.id === userId;
-            const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
+            const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15 * 60 * 1000 });
 
             collector.on('collect', async (menuInteraction) => {
                 try {

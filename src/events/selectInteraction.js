@@ -46,20 +46,42 @@ module.exports = {
                     // Deduct credits and log the purchase
                     await deductUserCredits(interaction.user.id, deductBy, true, purchasedItem);
 
-                    // Handle item types dynamically
-                    if (type === 'chunk_claim') {
-                        // Get the user's Minecraft username
-                        const minecraftUsername = await getMinecraftUsername(interaction.user.id);
+                   // Handle item types dynamically
+                if (type === 'chunk_claim') {
+                    // Check if the user has already purchased this item
+                    const checkPurchaseQuery = `
+                        SELECT COUNT(*) AS purchaseCount
+                        FROM user_purchases
+                        WHERE discord_id = ? AND item_id = ?
+                    `;
+                    const [purchaseRecord] = await Database.query(checkPurchaseQuery, [interaction.user.id, selectedItem.id]);
 
-                        // Construct the dynamic command
-                        const command = effectValue.replace('{minecraftUsername}', minecraftUsername);
-
-                        // Send the command to the server
-                        await sendConsoleCommand(serverName, command);
-
+                    if (purchaseRecord.purchaseCount > 0) {
                         return interaction.editReply({
-                            content: `✅ Your purchase of **${purchasedItem}** has been successful!`,
+                            content: `❌ You have already purchased the item **${purchasedItem}**. You cannot purchase it again.`,
                         });
+                    }
+
+                    // Get the user's Minecraft username
+                    const minecraftUsername = await getMinecraftUsername(interaction.user.id);
+
+                    // Construct the dynamic command
+                    const command = effectValue.replace('{minecraftUsername}', minecraftUsername);
+
+                    // Send the command to the server
+                    await sendConsoleCommand(serverName, command);
+
+                    // Log the purchase in the database
+                    const logPurchaseQuery = `
+                        INSERT INTO user_purchases (discord_id, item_id, purchase_date)
+                        VALUES (?, ?, NOW())
+                    `;
+                    await Database.query(logPurchaseQuery, [interaction.user.id, selectedItem.id]);
+
+                    return interaction.editReply({
+                        content: `✅ Your purchase of **${purchasedItem}** has been successful!`,
+                    });
+
                     } else if (type === 'cosmetic') {
                         // Handle cosmetic purchases (e.g., add to user inventory)
                         const addCosmeticQuery = `
