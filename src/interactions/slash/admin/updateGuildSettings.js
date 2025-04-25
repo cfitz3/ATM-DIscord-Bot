@@ -1,6 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const Database = require('../../../api/constants/sql.js');
-const { adminOnly } = require('./manageSchedules.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -33,12 +32,33 @@ module.exports = {
         .addIntegerOption(option =>
             option.setName('base_xp')
                 .setDescription('The base XP awarded per message.')
+        )
+        .addStringOption(option =>
+            option.setName('rank')
+                .setDescription('The rank to configure (e.g., Bronze, Silver, Gold).')
+        )
+        .addIntegerOption(option =>
+            option.setName('level')
+                .setDescription('The level required to achieve this rank.')
+        )
+        .addRoleOption(option =>
+            option.setName('rank_role')
+                .setDescription('The Discord role to associate with this rank.')
         ),
 
-    adminOnly: true,
+
 
     async execute(interaction) {
         const guildId = interaction.guildId;
+
+        
+    // Check if the user is the server owner
+    if (interaction.user.id !== interaction.guild.ownerId) {
+        return interaction.reply({
+            content: '❌ You must be the server owner to configure settings.',
+            ephemeral: true,
+        });
+    }
 
         // Collect all provided options
         const updates = {};
@@ -49,6 +69,9 @@ module.exports = {
         const prefix = interaction.options.getString('prefix');
         const requirements = interaction.options.getInteger('requirements');
         const baseXP = interaction.options.getInteger('base_xp');
+        const rank = interaction.options.getString('rank');
+        const level = interaction.options.getInteger('level');
+        const rankRole = interaction.options.getRole('rank_role');
 
         if (adminRole) updates.admin_role_id = adminRole.id;
         if (staffRole) updates.staff_role_id = staffRole.id;
@@ -72,6 +95,29 @@ module.exports = {
                 });
             }
             updates.base_xp = baseXP;
+        }
+
+        // Handle rank-to-role mapping
+        if (rank && level !== null && rankRole) {
+            try {
+                const rankRoleQuery = `
+                    INSERT INTO rank_roles (guild_id, rank, level, role_id)
+                    VALUES (?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE level = VALUES(level), role_id = VALUES(role_id)
+                `;
+                await Database.query(rankRoleQuery, [guildId, rank, level, rankRole.id]);
+
+                return interaction.reply({
+                    content: `✅ Successfully associated the rank **${rank}** (Level ${level}) with the role **${rankRole.name}**.`,
+                    ephemeral: true,
+                });
+            } catch (error) {
+                console.error('Error setting rank role:', error);
+                return interaction.reply({
+                    content: '❌ An error occurred while setting the rank role. Please try again later.',
+                    ephemeral: true,
+                });
+            }
         }
 
         // If no valid options were provided, return an error
