@@ -51,7 +51,7 @@ module.exports = {
                     // Check if the user has already purchased this item
                     const checkPurchaseQuery = `
                         SELECT COUNT(*) AS purchaseCount
-                        FROM user_purchases
+                        FROM purchases
                         WHERE discord_id = ? AND item_id = ?
                     `;
                     const [purchaseRecord] = await Database.query(checkPurchaseQuery, [interaction.user.id, selectedItem.id]);
@@ -73,7 +73,7 @@ module.exports = {
 
                     // Log the purchase in the database
                     const logPurchaseQuery = `
-                        INSERT INTO user_purchases (discord_id, item_id, purchase_date)
+                        INSERT INTO purchases (discord_id, item_id, purchase_date)
                         VALUES (?, ?, NOW())
                     `;
                     await Database.query(logPurchaseQuery, [interaction.user.id, selectedItem.id]);
