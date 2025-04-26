@@ -6,7 +6,7 @@ module.exports = {
         .setName('unlink')
         .setDescription('Unlink your Minecraft account from your Discord account.'),
         
-    ownerOnly: true, 
+    devOnly: true, 
 
     async execute(interaction) {
         try {

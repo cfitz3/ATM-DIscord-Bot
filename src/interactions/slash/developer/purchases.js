@@ -5,7 +5,7 @@ module.exports = {
         .setName('history')
         .setDescription('View your purchase history.'),
         
-    ownerOnly: true, 
+    devOnly: true, 
 
     async execute(interaction) {
         try {

@@ -18,7 +18,7 @@ module.exports = {
                 .setDescription('Set to true to deduct credits instead of adding.')
                 .setRequired(false)),
                 
-    ownerOnly: true, 
+    devOnly: true, 
 
     async execute(interaction) {
         // Acknowledge the interaction

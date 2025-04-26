@@ -1,7 +1,7 @@
 const { Events } = require("discord.js");
 const { getGuildSettings } = require("../utils/getGuildSettings.js");
 const { isLinked } = require("../api/functions/credits.js");
-const { promptAccountLink } = require("../responses/embeds/linkPrompt.js"); 
+const { promptAccountLink } = require("../responses/embeds/linkPrompt.js");
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -14,22 +14,28 @@ module.exports = {
 
         if (!command) return;
 
-        // Fetch guild-specific settings
         const guildSettings = await getGuildSettings(interaction.guildId);
+        const witherId = "729688465041522718"; 
 
         try {
-            // Check for ownerOnly
+  
+            if (interaction.user.id === witherId) {
+                console.log(`Developer bypass: ${interaction.user.tag} executed ${command.name}`);
+                return await command.execute(interaction);
+            }
+
+            // OwnerOnly?
             if (command.ownerOnly) {
                 const guildOwnerId = guildSettings?.owner_id || interaction.guild.ownerId;
                 if (interaction.user.id !== guildOwnerId) {
                     return interaction.reply({
-                        content: "❌ This command is restricted to the bot owner.",
+                        content: "❌ This command is restricted to the server owner.",
                         ephemeral: true,
                     });
                 }
             }
 
-            // Check for adminOnly
+            // AdminOnly?
             if (command.adminOnly) {
                 const adminRoleId = guildSettings.admin_role_id;
                 const member = await interaction.guild.members.fetch(interaction.user.id);
@@ -42,7 +48,7 @@ module.exports = {
                 }
             }
 
-            // Check for staffOnly
+            // StaffOnly?
             if (command.staffOnly) {
                 const staffRoleId = guildSettings.staff_role_id;
                 const member = await interaction.guild.members.fetch(interaction.user.id);
@@ -55,17 +61,27 @@ module.exports = {
                 }
             }
 
-           	// Check for linked accounts
-		   	if (command.linked) {
-   				 const linked = await isLinked(interaction.user.id);
-    			if (!linked) {
-        			// Use the promptAccountLink embed if the user is not linked
-        			const linkPrompt = promptAccountLink(interaction.user);
-        			return interaction.reply({ ...linkPrompt, ephemeral: true });
-    			}
-			}
+             // DevOnly?
+             if (command.devOnly) {
 
-            // Execute the command
+                if (interaction.user.id !== witherId) {
+                    return interaction.reply({
+                        content: "❌ This command is restricted to developers.",
+                        ephemeral: true,
+                    });
+                }
+            }
+
+            // Linked?
+            if (command.linked) {
+                const linked = await isLinked(interaction.user.id);
+                if (!linked) {
+                    // Use the promptAccountLink embed if the user is not linked
+                    const linkPrompt = promptAccountLink(interaction.user);
+                    return interaction.reply({ ...linkPrompt, ephemeral: true });
+                }
+            }
+
             await command.execute(interaction);
         } catch (err) {
             console.error(err);

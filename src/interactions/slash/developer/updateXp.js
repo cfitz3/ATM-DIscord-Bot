@@ -6,7 +6,7 @@ module.exports = {
         .setName('updatexp')
         .setDescription('Developer-only command to update user XP based on historical messages sent.'),
    
-    ownerOnly: true,
+    devOnly: true,
 
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });

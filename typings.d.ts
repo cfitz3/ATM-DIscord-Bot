@@ -69,6 +69,9 @@ export interface SlashInteractionCommand {
     // Whether this command is restricted to the bot owner only
     ownerOnly?: boolean;
 
+	// Whether this command is restricted to the bot owner only.
+	devOnly?: boolean;
+
 	// Whether this command is restricted to linked users only
 	linked?: boolean; 
 	

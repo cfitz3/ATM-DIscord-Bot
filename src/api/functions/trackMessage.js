@@ -1,12 +1,11 @@
 const Database = require("../constants/sql.js");
-const { incrementUserCredit } = require("./credits.js");
 const { Collection } = require("discord.js");
 const { calculateXPForLevel } = require("../../utils/helperFunctions.js");
 
 const messageCooldowns = new Collection();
 const cooldownTime = 5000;
 
-async function trackMessage(author, baseXP = 15) {
+async function trackMessage(author, guild, baseXP = 15) {
     const discordId = author.id;
     const discordUsername = author.username;
 
@@ -49,9 +48,14 @@ async function trackMessage(author, baseXP = 15) {
 
         // Check if the user leveled up
         if (currentXP >= xpForNextLevel) {
-            const newLevel = currentLevel + 1;
+            let newLevel = currentLevel;
 
-            // Update the user's level
+            // Increment levels until the XP is below the next level threshold
+            while (currentXP >= calculateXPForLevel(newLevel)) {
+                newLevel++;
+            }
+
+            // Update the user's level in the database
             const updateLevelQuery = `
                 UPDATE message_counts
                 SET level = ?
@@ -61,11 +65,45 @@ async function trackMessage(author, baseXP = 15) {
 
             // Reward the user for leveling up
             console.log(`User ${discordUsername} leveled up to level ${newLevel}!`);
+
+            // Fetch rank-to-role mappings for the guild
+            const fetchRankRolesQuery = `
+                SELECT rank, role_id
+                FROM rank_roles
+                WHERE guild_id = ?
+            `;
+            const rankRoles = await Database.query(fetchRankRolesQuery, [guild.id]);
+
+            // Find the role for the new level
+            const rankRole = rankRoles.find(role => role.rank === `Level ${newLevel}`);
+
+            if (rankRole) {
+                const role = guild.roles.cache.get(rankRole.role_id);
+                if (role) {
+                    // Fetch the member
+                    const member = await guild.members.fetch(discordId);
+
+                    // Assign the new role
+                    await member.roles.add(role);
+
+                    // Remove other rank roles
+                    for (const { role_id } of rankRoles) {
+                        if (role_id !== rankRole.role_id) {
+                            const otherRole = guild.roles.cache.get(role_id);
+                            if (otherRole) {
+                                await member.roles.remove(otherRole);
+                            }
+                        }
+                    }
+
+                    console.log(`Assigned role ${role.name} to user ${discordUsername} for reaching level ${newLevel}.`);
+                }
+            }
         }
 
         return true;
     } catch (err) {
-        console.error("Error updating XP or credits:", err);
+        console.error("Error updating XP or assigning roles:", err);
         return false;
     }
 }
