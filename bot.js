@@ -277,7 +277,8 @@ const commandJsonData = [
 // List of guild IDs where you want to register commands
 const guildIds = [
 	config.global.atm_guild_id,
-	config.global.test_guild_id
+	config.global.test_guild_id,
+	config.global.cottagequest_guild_id,	
 ];
 
 (async () => {
