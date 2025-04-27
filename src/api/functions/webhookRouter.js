@@ -27,14 +27,18 @@ router.post('/uptime-kuma', async (req, res) => {
 
         console.log('Parsed webhook payload:', body);
 
-        const { serverName, status } = body;
+        // Extract necessary fields from the payload
+        const serverName = body.monitor?.name || 'Unknown Server'; // Use monitor name if available
+        const status = body.heartbeat?.status === 0 ? 'down' : 'up'; // Map status code to "down" or "up"
+        const message = body.heartbeat?.msg || 'No message provided';
 
         if (!serverName || !status) {
             return res.status(400).send('Invalid payload: Missing serverName or status.');
         }
 
-        console.log(`Received webhook from Uptime Kuma: serverName=${serverName}, status=${status}`);
+        console.log(`Received webhook from Uptime Kuma: serverName=${serverName}, status=${status}, message=${message}`);
 
+        // Handle the "down" status
         if (status === 'down') {
             console.log(`Server ${serverName} is down. Initiating crash report analysis...`);
             await handleCrashReport(serverName, body.guildId || 'default-guild-id'); // Replace with actual guildId logic
