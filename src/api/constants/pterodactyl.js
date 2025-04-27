@@ -1,5 +1,5 @@
 const axios = require('axios');
-const config = require('../../../config.json'); 
+const config = require('../../../config.json');
 
 function getServerId(serverName) {
     const serverId = config.pterodactyl.servers[serverName];
@@ -10,7 +10,7 @@ function getServerId(serverName) {
 }
 
 function createAxiosInstance(serverName) {
-    const serverId = getServerId(serverName); 
+    const serverId = getServerId(serverName);
     const { url, client_api_key: apiKey } = config.pterodactyl;
 
     return axios.create({
@@ -75,8 +75,37 @@ async function sendPowerAction(serverName, action) {
     }
 }
 
+// Lists files in a directory
+async function listFiles(serverName, directory = '/') {
+    const axiosInstance = createAxiosInstance(serverName);
+
+    try {
+   
+
+        const response = await axiosInstance.get(`/files/list?directory=${encodeURIComponent(directory)}`);
+        return response.data.data; // Returns an array of files and directories
+    } catch (error) {
+        console.error('Error listing files:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+}
+
+// Reads the contents of a file
+async function readFile(serverName, filePath) {
+    const axiosInstance = createAxiosInstance(serverName);
+
+    try {
+        const response = await axiosInstance.get(`/files/contents?file=${encodeURIComponent(filePath)}`);
+        return response.data; // Returns the file contents as a string
+    } catch (error) {
+        handleAxiosError(error);
+    }
+}
+
 module.exports = {
     sendConsoleCommand,
     getServerPowerState,
     sendPowerAction,
+    listFiles,
+    readFile,
 };

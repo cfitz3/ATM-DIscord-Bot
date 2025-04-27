@@ -43,45 +43,44 @@ module.exports = {
                         });
                     }
 
-                    // Deduct credits and log the purchase
-                    await deductUserCredits(interaction.user.id, deductBy, true, purchasedItem);
+                    // Handle item types dynamically
+                    if (type === 'chunk_claim') {
+                        // Check if the user has already purchased this item
+                        const checkPurchaseQuery = `
+                            SELECT COUNT(*) AS purchaseCount
+                            FROM purchases
+                            WHERE discord_id = ? AND item_name = ?
+                        `;
+                        const [purchaseRecord] = await Database.query(checkPurchaseQuery, [interaction.user.id, purchasedItem]);
 
-                   // Handle item types dynamically
-                if (type === 'chunk_claim') {
-                    // Check if the user has already purchased this item
-                    const checkPurchaseQuery = `
-                        SELECT COUNT(*) AS purchaseCount
-                        FROM purchases
-                        WHERE discord_id = ? AND item_id = ?
-                    `;
-                    const [purchaseRecord] = await Database.query(checkPurchaseQuery, [interaction.user.id, selectedItem.id]);
+                        if (purchaseRecord.purchaseCount > 0) {
+                            return interaction.editReply({
+                                content: `❌ You have already purchased the item **${purchasedItem}**. You cannot purchase it again.`,
+                            });
+                        }
 
-                    if (purchaseRecord.purchaseCount > 0) {
+                        // Deduct credits and log the purchase
+                        await deductUserCredits(interaction.user.id, deductBy, true, purchasedItem);
+
+                        // Get the user's Minecraft username
+                        const minecraftUsername = await getMinecraftUsername(interaction.user.id);
+
+                        // Construct the dynamic command
+                        const command = effectValue.replace('{minecraftUsername}', minecraftUsername);
+
+                        // Send the command to the server
+                        await sendConsoleCommand(serverName, command);
+
+                        // Log the purchase in the database
+                        const logPurchaseQuery = `
+                            INSERT INTO purchases (discord_id, item_name, purchase_date)
+                            VALUES (?, ?, NOW())
+                        `;
+                        await Database.query(logPurchaseQuery, [interaction.user.id, purchasedItem]);
+
                         return interaction.editReply({
-                            content: `❌ You have already purchased the item **${purchasedItem}**. You cannot purchase it again.`,
+                            content: `✅ Your purchase of **${purchasedItem}** has been successful!`,
                         });
-                    }
-
-                    // Get the user's Minecraft username
-                    const minecraftUsername = await getMinecraftUsername(interaction.user.id);
-
-                    // Construct the dynamic command
-                    const command = effectValue.replace('{minecraftUsername}', minecraftUsername);
-
-                    // Send the command to the server
-                    await sendConsoleCommand(serverName, command);
-
-                    // Log the purchase in the database
-                    const logPurchaseQuery = `
-                        INSERT INTO purchases (discord_id, item_id, purchase_date)
-                        VALUES (?, ?, NOW())
-                    `;
-                    await Database.query(logPurchaseQuery, [interaction.user.id, selectedItem.id]);
-
-                    return interaction.editReply({
-                        content: `✅ Your purchase of **${purchasedItem}** has been successful!`,
-                    });
-
                     } else if (type === 'cosmetic') {
                         // Handle cosmetic purchases (e.g., add to user inventory)
                         const addCosmeticQuery = `

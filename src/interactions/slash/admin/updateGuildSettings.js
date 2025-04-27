@@ -21,6 +21,10 @@ module.exports = {
             option.setName('welcome_channel')
                 .setDescription('The welcome channel to set.')
         )
+        .addChannelOption(option =>
+            option.setName('staff_announcements_channel')
+                .setDescription('The staff announcements channel to set.') // New option
+        )
         .addStringOption(option =>
             option.setName('prefix')
                 .setDescription('The command prefix to set (1-5 characters).')
@@ -44,21 +48,22 @@ module.exports = {
         .addRoleOption(option =>
             option.setName('rank_role')
                 .setDescription('The Discord role to associate with this rank.')
+        )
+        .addStringOption(option =>
+            option.setName('crash_report_webhook')
+                .setDescription('The webhook URL to send crash reports to.')
         ),
-
-
 
     async execute(interaction) {
         const guildId = interaction.guildId;
 
-        
-    // Check if the user is the server owner
-    if (interaction.user.id !== interaction.guild.ownerId) {
-        return interaction.reply({
-            content: '❌ You must be the server owner to configure settings.',
-            ephemeral: true,
-        });
-    }
+        // Check if the user is the server owner
+        if (interaction.user.id !== interaction.guild.ownerId) {
+            return interaction.reply({
+                content: '❌ You must be the server owner to configure settings.',
+                ephemeral: true,
+            });
+        }
 
         // Collect all provided options
         const updates = {};
@@ -66,17 +71,20 @@ module.exports = {
         const staffRole = interaction.options.getRole('staff_role');
         const logChannel = interaction.options.getChannel('log_channel');
         const welcomeChannel = interaction.options.getChannel('welcome_channel');
+        const staffAnnouncementsChannel = interaction.options.getChannel('staff_announcements_channel'); // New option
         const prefix = interaction.options.getString('prefix');
         const requirements = interaction.options.getInteger('requirements');
         const baseXP = interaction.options.getInteger('base_xp');
         const rank = interaction.options.getString('rank');
         const level = interaction.options.getInteger('level');
         const rankRole = interaction.options.getRole('rank_role');
+        const crashReportWebhook = interaction.options.getString('crash_report_webhook');
 
         if (adminRole) updates.admin_role_id = adminRole.id;
         if (staffRole) updates.staff_role_id = staffRole.id;
         if (logChannel) updates.log_channel_id = logChannel.id;
         if (welcomeChannel) updates.welcome_channel_id = welcomeChannel.id;
+        if (staffAnnouncementsChannel) updates.staff_announcements_channel = staffAnnouncementsChannel.id; // Add to updates
         if (prefix) {
             if (prefix.length > 5) {
                 return interaction.reply({
@@ -96,6 +104,15 @@ module.exports = {
             }
             updates.base_xp = baseXP;
         }
+        if (crashReportWebhook) {
+            if (!crashReportWebhook.startsWith('https://discord.com/api/webhooks/')) {
+                return interaction.reply({
+                    content: '❌ The provided webhook URL is invalid. Please provide a valid Discord webhook URL.',
+                    ephemeral: true,
+                });
+            }
+            updates.crash_report_webhook = crashReportWebhook;
+        }  
 
         // Handle rank-to-role mapping
         if (rank && level !== null && rankRole) {

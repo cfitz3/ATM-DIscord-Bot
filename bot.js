@@ -18,6 +18,10 @@ const { reloadScheduledTasks } = require("./src/utils/scheduler.js");
 const Database = require('./src/api/constants/sql.js');
 const dbInstance = Database; 
 
+const startExpressServer = require('./src/api/constants/express.js'); // Import the Express server
+console.log('Starting Express server...');
+startExpressServer(); // This ensures the Express server starts when the bot is ready
+
 
 
 
@@ -38,6 +42,8 @@ const client = new Client({
 	],
 	partials: [Partials.Channel],
 });
+
+
 
 /**********************************************************************/
 // Below we will be making an event handler!

@@ -1,3 +1,5 @@
+const Database = require('../api/constants/sql.js'); 
+
 function formatUsername(username, gamemode) {
   if (gamemode === "ironman") return `♲ ${username}`;
   if (gamemode === "bingo") return `Ⓑ ${username}`;
@@ -33,6 +35,8 @@ function escapeRegex(string) {
 function calculateXPForLevel(level) {
   return 5 * (level ** 2) + 50 * level + 100; // Quadratic scaling
 }
+
+
 
 module.exports = {
   formatUsername,
