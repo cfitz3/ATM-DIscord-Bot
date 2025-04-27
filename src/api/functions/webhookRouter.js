@@ -5,15 +5,29 @@ const router = express.Router();
 
 router.post('/uptime-kuma', async (req, res) => {
     try {
-        // Log the raw body for debugging
-        console.log('Received webhook payload:', req.body);
+        let body = req.body;
 
-        // Ensure req.body is defined
-        if (!req.body || typeof req.body !== 'object') {
-            return res.status(400).send('Invalid payload: Body is missing or not JSON.');
+        // If req.body is empty, parse the raw body manually
+        if (!body || Object.keys(body).length === 0) {
+            console.log('Body is empty, attempting to parse raw body...');
+            const rawBody = await new Promise((resolve, reject) => {
+                let data = '';
+                req.on('data', chunk => (data += chunk));
+                req.on('end', () => resolve(data));
+                req.on('error', err => reject(err));
+            });
+
+            try {
+                body = JSON.parse(rawBody);
+            } catch (error) {
+                console.error('Failed to parse raw body as JSON:', rawBody);
+                return res.status(400).send('Invalid payload: Body is not valid JSON.');
+            }
         }
 
-        const { serverName, status } = req.body;
+        console.log('Parsed webhook payload:', body);
+
+        const { serverName, status } = body;
 
         if (!serverName || !status) {
             return res.status(400).send('Invalid payload: Missing serverName or status.');
@@ -23,7 +37,7 @@ router.post('/uptime-kuma', async (req, res) => {
 
         if (status === 'down') {
             console.log(`Server ${serverName} is down. Initiating crash report analysis...`);
-            await handleCrashReport(serverName, req.body.guildId || 'default-guild-id'); // Replace with actual guildId logic
+            await handleCrashReport(serverName, body.guildId || 'default-guild-id'); // Replace with actual guildId logic
         }
 
         res.status(200).send('Webhook received');
