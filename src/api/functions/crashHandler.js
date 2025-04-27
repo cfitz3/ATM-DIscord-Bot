@@ -24,8 +24,19 @@ async function handleCrashReport(serverName, guildId) {
     try {
         const crashReportsDirectory = '/crash-reports';
 
-        // Helper function to get the latest crash report
-        const latestFile = await getLatestCrashReport(serverName, crashReportsDirectory);
+        // List all files in the crash-reports directory
+        const files = await listFiles(serverName, crashReportsDirectory);
+
+        if (!files || files.length === 0) {
+            console.log(`No crash reports found for server ${serverName}`);
+            return null;
+        }
+
+        // Find the most recent crash report
+        const latestFile = files
+            .filter(file => !file.attributes.is_directory) // Ensure it's a file, not a directory
+            .sort((a, b) => new Date(b.attributes.modified_at) - new Date(a.attributes.modified_at))[0];
+
         if (!latestFile) {
             console.log(`No valid crash report files found for server ${serverName}`);
             return null;
@@ -33,73 +44,56 @@ async function handleCrashReport(serverName, guildId) {
 
         console.log(`Latest crash report for ${serverName}: ${latestFile.attributes.name}`);
 
-        // Read and truncate the crash report
+        // Read the contents of the latest crash report
         const filePath = `${crashReportsDirectory}/${latestFile.attributes.name}`;
         let crashReportContents = await readFile(serverName, filePath);
+
+        // Truncate the crash report at "Mod List:"
         crashReportContents = truncateCrashReport(crashReportContents);
 
-        // Analyze the crash report
+        // Analyze the crash report using the Perplexity API
         console.log(`Sending crash report to Perplexity API for analysis...`);
-        const { summary, suggestions } = await analyzeCrashReport(crashReportContents);
+        const explanation = await analyzeCrashReport(crashReportContents);
         console.log(`Perplexity API analysis completed successfully.`);
 
-        // Retrieve webhook URL and send the report
-        const webhookUrl = await getWebhookUrl(guildId);
-        if (!webhookUrl) {
+        // Retrieve the crash report webhook URL from the database
+        const query = `
+            SELECT crash_report_webhook
+            FROM server_settings
+            WHERE guild_id = ?
+        `;
+        const [result] = await Database.query(query, [guildId]);
+
+        if (!result || !result.crash_report_webhook) {
             console.error(`No crash report webhook configured for guild ID: ${guildId}`);
             return;
         }
 
-        await sendWebhook(webhookUrl, serverName, summary, suggestions);
+        const webhookUrl = result.crash_report_webhook;
+
+        // Send the crash report to the webhook
+        console.log(`Sending crash report to webhook: ${webhookUrl}`);
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `🚨 **Crash Analysis for: ${serverName}**`,
+                embeds: [
+                    {
+                        title: 'Automatic Analysis',
+                        description: explanation.slice(0, 2000), // Discord embed limit
+                        color: 0xff0000,
+                        timestamp: new Date().toISOString(),
+                    },
+                ],
+            }),
+        });
+
         console.log(`Crash report sent successfully to webhook: ${webhookUrl}`);
     } catch (error) {
         console.error(`Error handling crash report for server ${serverName}:`, error.message);
         throw error;
     }
-}
-
-// Helper functions for modularity
-async function getLatestCrashReport(serverName, directory) {
-    const files = await listFiles(serverName, directory);
-    if (!files || files.length === 0) return null;
-
-    return files
-        .filter(file => !file.attributes.is_directory)
-        .sort((a, b) => new Date(b.attributes.modified_at) - new Date(a.attributes.modified_at))[0];
-}
-
-async function getWebhookUrl(guildId) {
-    const query = `
-        SELECT crash_report_webhook
-        FROM server_settings
-        WHERE guild_id = ?
-    `;
-    const [result] = await Database.query(query, [guildId]);
-    return result ? result.crash_report_webhook : null;
-}
-
-async function sendWebhook(webhookUrl, serverName, summary, suggestions) {
-    await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            content: `🚨 **Crash Report for Server: ${serverName}**`,
-            embeds: [
-                {
-                    title: 'Crash Report Summary',
-                    description: summary.slice(0, 2000),
-                    color: 0xff0000,
-                    fields: [
-                        {
-                            name: 'Suggestions',
-                            value: suggestions.slice(0, 1024),
-                        },
-                    ],
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-        }),
-    });
 }
 
 module.exports = { handleCrashReport };
