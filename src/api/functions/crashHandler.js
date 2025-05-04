@@ -81,7 +81,7 @@ async function handleCrashReport(serverName, guildId) {
                 embeds: [
                     {
                         title: 'Automatic Analysis',
-                        description: explanation.slice(0, 2000), // Discord embed limit
+                        description: explanation,
                         color: 0xff0000,
                         timestamp: new Date().toISOString(),
                     },
