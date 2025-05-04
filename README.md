@@ -1,6 +1,16 @@
 # ATM Discord Bot
 
-ATM Discord Bot is a feature-rich bot designed to enhance your Discord server with economy, moderation, and utility features. Below is a list of all available commands and their descriptions.
+ATM Discord Bot is a private, feature-rich bot designed to enhance the AllTheModiumCraft (and partner) Discord servers with economy, moderation, and server management features. Below is a list of all available commands and their descriptions.
+
+---
+
+## **Features**
+- **Economy System**: Earn XP and credits, view leaderboards, and manage your profile.
+- **Shop System**: Purchase cosmetics and other items from the server shop.
+- **Moderation Tools**: Admin commands to manage server settings and assist with moderation.
+- **Developer Utilities**: Tools for recalculating levels and debugging.
+- **Utility Commands**: Pterodactyl integration for economy system and administration.
+- **Automatic Crash Analysis**: Making use of Perplexity's Sonar-Pro LLM and Uptime Kuma, automatically fetch latest crash report and provide a human-friendly readout via Discord webhook
 
 ---
 
@@ -49,16 +59,3 @@ ATM Discord Bot is a feature-rich bot designed to enhance your Discord server wi
 
 ---
 
-## **Features**
-- **Economy System**: Earn XP and credits, view leaderboards, and manage your profile.
-- **Shop System**: Purchase cosmetics and other items from the server shop.
-- **Moderation Tools**: Admin commands to manage server settings and assist with moderation.
-- **Developer Utilities**: Tools for recalculating levels and debugging.
-- **Utility Commands**: General-purpose commands for server members.
-
----
-
-## **Setup**
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
