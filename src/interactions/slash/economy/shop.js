@@ -68,76 +68,9 @@ module.exports = {
             // Send the embed with the dropdown menu
             await interaction.reply({ embeds: [shopEmbed], components: [row], ephemeral: true });
 
-            // Handle the dropdown interaction
-            const filter = (i) => i.customId === 'shop_menu' && i.user.id === userId;
-            const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15 * 60 * 1000 });
-
-            collector.on('collect', async (menuInteraction) => {
-                try {
-                    const selectedItemId = menuInteraction.values[0];
-
-                    // Fetch the selected item from the database
-                    const selectedItemQuery = `
-                        SELECT id, name, price, type
-                        FROM shop_items
-                        WHERE id = ?
-                    `;
-                    const [selectedItem] = await Database.query(selectedItemQuery, [selectedItemId]);
-
-                    if (!selectedItem) {
-                        return menuInteraction.editReply({
-                            content: '❌ The selected item is no longer available.',
-                        });
-                    }
-
-                    // Check if the user has enough credits
-                    const updatedUserCredits = await getUserCredits(userId);
-                    if (updatedUserCredits < selectedItem.price) {
-                        return menuInteraction.editReply({
-                            content: `❌ You don't have enough credits to purchase **${selectedItem.name}**.`,
-                        });
-                    }
-
-                    // Deduct credits and handle the purchase
-                    const deductCreditsQuery = `
-                        UPDATE users
-                        SET credits = credits - ?
-                        WHERE discord_id = ?
-                    `;
-                    await Database.query(deductCreditsQuery, [selectedItem.price, userId]);
-
-                    if (selectedItem.type === 'cosmetic') {
-                        // Add the cosmetic to the user's inventory
-                        const addCosmeticQuery = `
-                            INSERT INTO user_cosmetics (discord_id, cosmetic_id, equipped)
-                            VALUES (?, ?, FALSE)
-                            ON DUPLICATE KEY UPDATE equipped = FALSE
-                        `;
-                        await Database.query(addCosmeticQuery, [userId, selectedItem.id]);
-                    } else if (selectedItem.type === 'chunk_claim') {
-                        // Handle chunk claim purchase logic here
-                        // (e.g., update the user's chunk claim limit)
-                    }
-
-                    return menuInteraction.editReply({
-                        content: `✅ You successfully purchased **${selectedItem.name}** for **${selectedItem.price} credits**!`,
-                    });
-                } catch (error) {
-                    console.error('Error processing shop interaction:', error);
-
-                    return menuInteraction.editReply({
-                        content: '❌ An error occurred while processing your purchase. Please try again later.',
-                    });
-                }
-            });
-
-            collector.on('end', async () => {
-                try {
-                    await interaction.editReply({ components: [] });
-                } catch (error) {
-                    console.error('Error clearing components after collector ended:', error);
-                }
-            });
+            // REMOVED: The collector that was causing the conflict
+            // Your selectInteraction.js already handles the shop_menu interactions
+            
         } catch (error) {
             console.error('Error executing shop command:', error);
 
