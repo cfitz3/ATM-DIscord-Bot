@@ -1,5 +1,5 @@
-
 const { EmbedBuilder } = require('discord.js');
+const Database = require('../api/constants/sql.js');
 
 const welcomeEmbed = (member) => {
     return new EmbedBuilder()
@@ -15,18 +15,25 @@ const welcomeEmbed = (member) => {
 module.exports = {
     name: "guildMemberAdd",
     async execute(member) {
-      console.log('guildMemberAdd event fired');  
-
- try {
-              const welcomeChannelId = '1321494302198726710'; 
-        const welcomeChannel = await member.guild.channels.cache.get(welcomeChannelId);
-        if (!welcomeChannel) {
-            console.error(`Channel with ID ${welcomeChannelId} not found`);
-            return;
-        }
+        try {
+            // Query the database for the welcome channel ID for this guild
+            const [result] = await Database.query(
+                'SELECT welcome_channel_id FROM guild_settings WHERE guild_id = ? LIMIT 1',
+                [member.guild.id]
+            );
+            const welcomeChannelId = result?.welcome_channel_id;
+            if (!welcomeChannelId) {
+                console.error(`No welcome channel set for guild ${member.guild.id}`);
+                return;
+            }
+            const welcomeChannel = member.guild.channels.cache.get(welcomeChannelId);
+            if (!welcomeChannel) {
+                console.error(`Channel with ID ${welcomeChannelId} not found`);
+                return;
+            }
             welcomeChannel.send({ content: `Welcome <@${member.id}>!`, embeds: [welcomeEmbed(member)] });
         } catch (error) {
             console.error(`Error in guildMemberAdd: ${error.message}`);
         }
     }
-}
+};
