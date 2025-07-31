@@ -67,9 +67,6 @@ module.exports = {
 
             // Send the embed with the dropdown menu
             await interaction.reply({ embeds: [shopEmbed], components: [row], ephemeral: true });
-
-            // REMOVED: The collector that was causing the conflict
-            // Your selectInteraction.js already handles the shop_menu interactions
             
         } catch (error) {
             console.error('Error executing shop command:', error);

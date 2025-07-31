@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, MessageFlags, TextDisplayBuilder, ContainerBuilder, MediaGalleryBuilder, } = require('discord.js');
 const { linkAccount } = require('../api/functions/credits.js');
 const { getUUID } = require('../api/constants/mowojangAPI.js');
 const Database = require('../api/constants/sql.js'); 
@@ -97,6 +97,47 @@ module.exports = {
                         ephemeral: true,
                     });
                 }
+            }  else if (interaction.customId === 'containerCreateModal') {
+                // --- Server Menu Modal Handler ---
+                const menuTitle = interaction.fields.getTextInputValue('menuTitle');
+                const menuDescription = interaction.fields.getTextInputValue('menuDescription');
+                const inputField1 = interaction.fields.getTextInputValue('inputField1') || '';
+                const inputField2 = interaction.fields.getTextInputValue('inputField2') || '';
+                const inputField3 = interaction.fields.getTextInputValue('inputField3') || '';
+
+                // Media gallery (static or add a field for this if you want)
+                const footerImage = new MediaGalleryBuilder().addItems([
+                    {
+                        media: {
+                            url: 'https://i.imgur.com/Y5pCOqz.png',
+                        },
+                    },
+                ]);
+
+                const titleAndDesc = new TextDisplayBuilder().setContent(
+                    `**${menuTitle}**\n\n${menuDescription}`
+                );
+                const spacer = new TextDisplayBuilder().setContent('\u200b');
+                const inputFields = new TextDisplayBuilder().setContent(
+                    [inputField1, inputField2, inputField3].filter(Boolean).join('\n')
+                );
+                const support = new TextDisplayBuilder().setContent(
+                    '> If you have any issues, feel free to open a ticket in #support.'
+                );
+                
+              const infoContainer = new ContainerBuilder()
+                    .addTextDisplayComponents(
+                        titleAndDesc,
+                        spacer,
+                        inputFields,
+                        support
+                    )
+                    .addMediaGalleryComponents(footerImage);
+
+                await interaction.reply({
+                    flags: MessageFlags.IsComponentsV2,
+                    components: [infoContainer]
+                });
             }
         } catch (error) {
             console.error('Error handling interaction:', error);
@@ -107,3 +148,5 @@ module.exports = {
         }
     },
 };
+
+

@@ -1,4 +1,4 @@
-const { Events } = require("discord.js");
+const { Events, MessageFlags, TextDisplayBuilder, ContainerBuilder } = require("discord.js");
 const { getUserCredits, deductUserCredits, getMinecraftUsername } = require('../api/functions/credits.js');
 const { sendConsoleCommand } = require('../api/constants/pterodactyl.js');
 const Database = require('../api/constants/sql.js');
@@ -11,7 +11,7 @@ module.exports = {
 
             if (customId === 'shop_menu') {
                 const selectedItemId = interaction.values[0];
-                const serverName = 'atm10'; // Replace with dynamic server name if needed
+                const serverName = 'atm10'; 
 
                 try {
                     // Defer the reply to avoid multiple replies
@@ -141,7 +141,72 @@ module.exports = {
                         content: '❌ An error occurred while equipping the cosmetic. Please try again later.',
                     });
                 }
+            } else if (customId === 'server-info-select') {
+                    const selectedServer = interaction.values[0];
+
+                    // Custom info for each server
+                    const serverInfo = {
+                        server1: {
+                            name: 'All The Mods 10',
+                            color: 0x4caf50,
+                            steps: [
+                                '📝 **1. Install the Modpack** [CurseForge Download](https://www.curseforge.com/minecraft/modpacks/all-the-mods-10)',
+                                '📦 **2. Download Additional Mods** [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat/version/neoforge-1.21.1-2.5.28)',
+                                '🌐 **3. Join the Server using the IP** `atm10.allthemodiumcraft.com`',
+                            ],
+                            support: 'Need help? Check out the #faq or ask in #general.'
+                        },
+                        server2: {
+                            name: 'Yet Another Vanilla+ Pack',
+                            color: 0x2196f3,
+                            steps: [
+                                '📝 **1. Install the Modpack** [Curseforge Download](https://www.curseforge.com/minecraft/modpacks/withers-pack)',
+                                '📦 **2. Download Additional Mods** [Mod List](https://www.curseforge.com/minecraft/modpacks/withers-pack/files/123456789)',
+                                '🌐 **3. Join the Server using the IP** `wp.allthemodiumcraft.com`',
+                            ],
+                            support: 'Need help? Check out the #faq or ask in #general.'
+                        }
+                    };
+
+                    const info = serverInfo[selectedServer];
+                if (!info) {
+                    return interaction.reply({
+                        content: '❌ Server info not found.',
+                        flags: MessageFlags.Ephemeral
+                    });
+                }
+
+                // Build the text content as a string (Markdown for styling)
+                const textContent = [
+                    `**${info.name} — Getting Started**\n`,
+                    ...info.steps.map(step => {
+                        const match = step.match(/^(.*?)(\[(.*?)\]\((.*?)\)|`(.*?)`)?$/);
+                        if (match) {
+                            const main = match[1].trim();
+                            const link = match[3] && match[4] ? `[${match[3]}](${match[4]})` : '';
+                            const code = match[5] ? `\`${match[5]}\`` : '';
+                            let value = main;
+                            if (link) value += `\n> ${link}`;
+                            if (code) value += `\n> ${code}`;
+                            return value;
+                        }
+                        return step;
+                    }),
+                    `> ${info.support}`
+                ].join('\n\n');
+
+                // Create the text display component
+                const textDisplay = new TextDisplayBuilder().setContent(textContent);
+
+                // Place the text display inside a container
+                const container = new ContainerBuilder().addTextDisplayComponents(textDisplay);
+
+                // Send the container as a v2 component message
+                return interaction.reply({
+                    flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+                    components: [container]
+                });
+                }
             }
         }
-    },
-};
+    }

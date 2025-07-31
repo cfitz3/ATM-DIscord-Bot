@@ -1,7 +1,5 @@
-const { Events } = require('discord.js');
-const { incrementUserCredit } = require('../api/functions/credits.js');
-const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
-
+const { MessageFlags, Events, TextDisplayBuilder, ContainerBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { serverMenuContainer }  = require('../messages/containers/serverMenuContainer.js');
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
@@ -16,8 +14,22 @@ module.exports = {
       await interaction.reply({ content: 'Restarting the bot...', ephemeral: true });
       process.exit();
     
-    } else if(interaction.customId === 'manualGuildRefreshButton'){
-      await refreshGuildData(interaction);
+    } else if (interaction.customId === 'sendServerMenu') {
+    // Build the select menu
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('server-info-select')
+        .setPlaceholder('Select a server to view info')
+        .addOptions([
+            { label: 'All The Mods 10', value: 'server1', emoji: '<:atm10:1387349750147186688>' },
+            { label: 'Yet Another Vanilla+ Pack', value: 'server2', emoji: '🟦' },
+        ]);
+    const row = new ActionRowBuilder().addComponents(selectMenu);
+    const container = serverMenuContainer();
+
+    await interaction.reply({
+        flags: MessageFlags.IsComponentsV2,
+        components: [container, row]
+    });
     }
       if (interaction.customId === 'link_account') {
 

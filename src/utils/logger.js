@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { getGuildSettings } = require('./getGuildSettings.js');
+const Database = require('../api/constants/sql.js'); 
 
 async function logModAction(guild, actionType, target, moderator, reason, channelId = 'unknown') {
     // Fetch guild settings to get the mod log channel
@@ -45,6 +46,22 @@ async function logModAction(guild, actionType, target, moderator, reason, channe
         await logChannel.send({ embeds: [embed] });
     } catch (err) {
         console.error(`Failed to send mod log message to channel ${logChannelId}:`, err);
+    }
+
+    // Insert the action into the mod_actions table
+    try {
+        await Database.query(
+            `INSERT INTO mod_actions (guild_id, user_id, moderator_id, action_type, reason) VALUES (?, ?, ?, ?, ?)`,
+            [
+                guild.id,
+                target.id,
+                moderator.id,
+                actionType,
+                reason || null
+            ]
+        );
+    } catch (dbErr) {
+        console.error('Failed to log mod action to database:', dbErr);
     }
 }
 
