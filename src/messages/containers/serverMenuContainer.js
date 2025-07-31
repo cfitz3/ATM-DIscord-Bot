@@ -7,7 +7,7 @@ const {
 function serverMenuContainer() {
     const titleAndDesc = new TextDisplayBuilder().setContent(
         '## <:arrow:1387213367982297189> Our Servers\n' +
-        '\nPick a server from the menu below to get a step-by-step guide and all the info you need!'
+        '\nPick a server from the menu below to all the info you need to join!'
     );
     const spacer = new TextDisplayBuilder().setContent('\u200b');
     const serverList = new TextDisplayBuilder().setContent(

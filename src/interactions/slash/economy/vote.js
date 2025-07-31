@@ -6,9 +6,6 @@ const embed = new EmbedBuilder()
     .setAuthor({ name: 'ATM Guild Bot', iconURL: 'https://i.imgur.com/eboO5Do.png' })
     .setDescription('Our servers are and always will be free to play. Please consider voting for us on the following sites. Voting helps us grow and attract new players to the community!')
     .addFields(
-        { name: 'Craft to Exile 2:', value: '[MCSL](https://minecraft-server-list.com/server/510426/)', inline: true }
-    )
-    .addFields(
         { name: 'All the Mods 10:', value: '[MCSL](https://minecraft-server-list.com/server/510233/)', inline: true }
     )
     .setTimestamp();
