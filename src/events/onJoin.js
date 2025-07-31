@@ -18,7 +18,7 @@ module.exports = {
         try {
             // Query the database for the welcome channel ID for this guild
             const [result] = await Database.query(
-                'SELECT welcome_channel_id FROM guild_settings WHERE guild_id = ? LIMIT 1',
+                'SELECT welcome_channel_id FROM server_settings WHERE guild_id = ? LIMIT 1',
                 [member.guild.id]
             );
             const welcomeChannelId = result?.welcome_channel_id;
