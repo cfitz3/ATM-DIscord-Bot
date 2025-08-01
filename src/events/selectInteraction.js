@@ -151,7 +151,7 @@ module.exports = {
                             color: 0x4caf50,
                             steps: [
                                 '📝 **1. Install the Modpack** [CurseForge Download](https://www.curseforge.com/minecraft/modpacks/all-the-mods-10)',
-                                '📦 **2. Download Additional Mods** [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat/version/neoforge-1.21.1-2.5.28)',
+                                '📦 **2. Download Additional Mods** [Required Mods](https://modrinth.com/collection/saM1NDLN)',
                                 '🌐 **3. Join the Server using the IP** `play.allthemodiumcraft.com`',
                             ],
                             support: 'Need help? Check out the #faq or ask in #general.'
